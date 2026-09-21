@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>VitalMonitor — Engineering Documentation Pack</title>
+<style>
+  :root{
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+    --bg:#ffffff; --fg:#1a1a1a; --muted:#5b6b78; --line:#d8e0e6;
+    --card:#f7fafc; --accent:#0d47a1; --warn:#b71c1c; --warnbg:#fff4f4;
+    --okbg:#f1f8f4; --ok:#1b5e20; --tint:#fffbe9; --tintline:#f0c33c;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#14181c; --fg:#e8edf1; --muted:#9bacb9; --line:#2c353d;
+      --card:#1b2127; --accent:#7fb2ff; --warn:#ff8a80; --warnbg:#2a1a1a;
+      --okbg:#16241a; --ok:#9ccc9c; --tint:#241f10; --tintline:#7a6420;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#14181c; --fg:#e8edf1; --muted:#9bacb9; --line:#2c353d;
+    --card:#1b2127; --accent:#7fb2ff; --warn:#ff8a80; --warnbg:#2a1a1a;
+    --okbg:#16241a; --ok:#9ccc9c; --tint:#241f10; --tintline:#7a6420;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);
+    font-family:"Segoe UI",Helvetica,Arial,sans-serif;line-height:1.6;font-size:16px}
+  .wrap{max-width:980px;margin:0 auto;padding:32px 20px 80px}
+  h1{font-size:1.9rem;margin:0 0 6px;line-height:1.25}
+  h2{font-size:1.35rem;margin:46px 0 12px;padding-bottom:7px;border-bottom:2px solid var(--line)}
+  h3{font-size:1.08rem;margin:26px 0 8px}
+  .sub{color:var(--muted);margin:0 0 4px}
+  .meta{color:var(--muted);font-size:.9rem;margin:0 0 24px}
+  table{border-collapse:collapse;width:100%;margin:12px 0;font-size:.92rem}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--card);font-weight:600}
+  .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  code{background:var(--card);padding:1px 5px;border-radius:4px;font-size:.88em}
+  .fig{margin:20px 0 28px;border:1px solid var(--line);border-radius:10px;padding:12px;background:#ffffff}
+  .fig svg{width:100%;height:auto;display:block}
+  .cap{color:var(--muted);font-size:.86rem;margin-top:8px;text-align:center}
+  .warn{background:var(--warnbg);border-left:4px solid var(--warn);padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0}
+  .warn strong{color:var(--warn)}
+  .ok{background:var(--okbg);border-left:4px solid var(--ok);padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0}
+  .tint{background:var(--tint);border-left:4px solid var(--tintline);padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0}
+  .log{border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin:14px 0;background:var(--card)}
+  .log h4{margin:0 0 4px;font-size:1rem}
+  .log .d{color:var(--muted);font-size:.85rem;margin:0 0 8px;font-variant-numeric:tabular-nums}
+  .log ul{margin:6px 0 0;padding-left:20px}
+  .log li{margin:3px 0}
+  ul,ol{padding-left:22px}
+  .pill{display:inline-block;font-size:.74rem;font-weight:700;letter-spacing:.4px;
+    padding:2px 8px;border-radius:20px;background:var(--accent);color:#fff;vertical-align:2px}
+  .pill.f{background:#b71c1c}
+  .pill.p{background:#e07b00}
+  .fill{background:var(--tint);border-bottom:1px dashed var(--tintline);padding:0 4px}
+  hr{border:0;border-top:1px solid var(--line);margin:40px 0}
+  @media print{ .fig{break-inside:avoid} h2{break-after:avoid} .log{break-inside:avoid} body{font-size:11pt} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>VitalMonitor — Engineering Documentation Pack</h1>
+<p class="sub">Ambient PM2.5 + fingertip PPG vitals monitor · Hardware V1.0 / Firmware V1.0</p>
+<p class="meta">Prepared 21 September 2026 · Priyanka · B.Tech ECE, Gayatri Vidya Parishad College of Engineering</p>
+
+<div class="warn">
+<strong>Read this first — four things in the V1.0 spec sheet contradict the firmware.</strong> The
+diagrams and tables below follow <code>vital_monitor.ino</code>, which is the working truth. The
+spec document needs correcting, not the code.
+<ol style="margin:8px 0 0">
+<li><strong>Breathing rate is not measured from the PPG waveform.</strong> The spec says it is. The firmware
+computes <code>BPM/4 + (98 − SpO2) × 0.5</code>, clamped to 8–40. It is an arithmetic guess, not a measurement.</li>
+<li><strong>The OLED and MAX30102 do not share an I²C bus.</strong> The spec says "Shared SDA, SCL". The code runs
+two separate buses: hardware I²C on GPIO6/7 and a bit-banged U8g2 bus on GPIO8/9.</li>
+<li><strong>A 3.3 V LDO alone cannot power this device.</strong> The PMS5003 fan and laser need 5 V. A 3.7 V cell
+must go through a boost converter. The spec's BOM has no boost stage.</li>
+<li><strong>The part is a MAX30105, not a MAX30102.</strong> The code calls <code>setPulseAmplitudeGreen()</code>,
+which only exists on the MAX30105 (it has a third, green LED). The library is shared, the silicon is not.
+Either part works if you drop that one line — but the BOM must say which you actually bought.</li>
+</ol>
+</div>
+
+<h2>1 · Block diagram</h2>
+<div class="fig"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 960" width="1500" height="960" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<defs>
+  <marker id="ar" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+    <path d="M0,0 L10,4 L0,8 Z" fill="#37474F"/>
+  </marker>
+  <marker id="arR" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+    <path d="M0,0 L10,4 L0,8 Z" fill="#D32F2F"/>
+  </marker>
+  <marker id="arB" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+    <path d="M0,0 L10,4 L0,8 Z" fill="#1565C0"/>
+  </marker>
+  <marker id="arP" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+    <path d="M0,0 L10,4 L0,8 Z" fill="#6A1B9A"/>
+  </marker>
+  <marker id="arG" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+    <path d="M0,0 L10,4 L0,8 Z" fill="#00796B"/>
+  </marker>
+</defs>
+
+<rect width="1500" height="960" fill="#FFFFFF"/>
+
+<text x="40" y="48" font-size="27" font-weight="700" fill="#111">VitalMonitor — System Block Diagram (V1.0)</text>
+<text x="40" y="74" font-size="14" fill="#546E7A">PM2.5 + PPG vitals monitor · ESP32-C3 SuperMini · derived from vital_monitor.ino and vitalmonitor.html</text>
+
+<!-- legend -->
+<g font-size="13" fill="#37474F">
+  <rect x="1010" y="28" width="460" height="62" rx="6" fill="#FAFAFA" stroke="#CFD8DC"/>
+  <line x1="1026" y1="48" x2="1066" y2="48" stroke="#D32F2F" stroke-width="3.5"/><text x="1074" y="52">Power</text>
+  <line x1="1146" y1="48" x2="1186" y2="48" stroke="#1565C0" stroke-width="3.5"/><text x="1194" y="52">I²C</text>
+  <line x1="1266" y1="48" x2="1306" y2="48" stroke="#6A1B9A" stroke-width="3.5"/><text x="1314" y="52">UART</text>
+  <line x1="1026" y1="74" x2="1066" y2="74" stroke="#00796B" stroke-width="3.5"/><text x="1074" y="78">BLE (wireless)</text>
+  <line x1="1266" y1="74" x2="1306" y2="74" stroke="#37474F" stroke-width="3.5"/><text x="1314" y="78">Data flow</text>
+</g>
+
+<!-- ============ POWER SUBSYSTEM ============ -->
+<rect x="40" y="110" width="360" height="330" rx="10" fill="#FFF5F5" stroke="#D32F2F" stroke-width="2" stroke-dasharray="7 5"/>
+<text x="56" y="136" font-size="15" font-weight="700" fill="#D32F2F">POWER SUBSYSTEM</text>
+
+<g stroke="#263238" stroke-width="2.2" fill="#FFFFFF">
+  <rect x="66" y="356" width="308" height="62" rx="7"/>
+  <rect x="66" y="262" width="308" height="62" rx="7"/>
+  <rect x="66" y="168" width="308" height="62" rx="7"/>
+</g>
+<text x="220" y="382" font-size="15" font-weight="600" text-anchor="middle" fill="#111">Li-Po cell 3.7 V nominal</text>
+<text x="220" y="402" font-size="13" text-anchor="middle" fill="#546E7A">1000–2000 mAh, JST-PH 2.0</text>
+
+<text x="220" y="288" font-size="15" font-weight="600" text-anchor="middle" fill="#111">TP4056 + DW01 module</text>
+<text x="220" y="308" font-size="13" text-anchor="middle" fill="#546E7A">USB-C charge 1 A · over-discharge cut-off</text>
+
+<text x="220" y="194" font-size="15" font-weight="600" text-anchor="middle" fill="#111">MT3608 boost 3.7 V → 5.0 V</text>
+<text x="220" y="214" font-size="13" text-anchor="middle" fill="#546E7A">needed for the PMS5003 fan + laser</text>
+
+<line x1="220" y1="356" x2="220" y2="332" stroke="#D32F2F" stroke-width="3.5" marker-end="url(#arR)"/>
+<line x1="220" y1="262" x2="220" y2="238" stroke="#D32F2F" stroke-width="3.5" marker-end="url(#arR)"/>
+
+<!-- rails out -->
+<path d="M374,199 L440,199 L440,300 L560,300" fill="none" stroke="#D32F2F" stroke-width="3.5" marker-end="url(#arR)"/>
+<text x="452" y="192" font-size="13" font-weight="600" fill="#D32F2F">+5.0 V rail</text>
+
+<path d="M440,199 L440,110 L1012,110 L1012,690" fill="none" stroke="#D32F2F" stroke-width="3.5"/>
+<line x1="1012" y1="690" x2="1012" y2="716" stroke="#D32F2F" stroke-width="3.5" marker-end="url(#arR)"/>
+<circle cx="440" cy="199" r="5" fill="#D32F2F"/>
+<text x="1024" y="104" font-size="13" font-weight="600" fill="#D32F2F">+5.0 V to PMS5003</text>
+
+<!-- ============ MCU ============ -->
+<rect x="560" y="200" width="380" height="560" rx="12" fill="#F3F7FC" stroke="#1565C0" stroke-width="2.6"/>
+<text x="750" y="234" font-size="19" font-weight="700" text-anchor="middle" fill="#0D47A1">ESP32-C3 SuperMini</text>
+<text x="750" y="256" font-size="13" text-anchor="middle" fill="#546E7A">RISC-V 160 MHz · 4 MB flash · BLE 5.0 · native USB</text>
+
+<rect x="584" y="272" width="332" height="44" rx="6" fill="#FFFFFF" stroke="#90A4AE"/>
+<text x="750" y="300" font-size="14" text-anchor="middle" fill="#111">On-board 3.3 V LDO  →  +3V3 rail (sensors, OLED)</text>
+
+<text x="584" y="348" font-size="14" font-weight="700" fill="#0D47A1">FIRMWARE SIGNAL CHAIN</text>
+
+<g stroke="#90A4AE" stroke-width="1.8" fill="#FFFFFF">
+  <rect x="584" y="360" width="332" height="40" rx="6"/>
+  <rect x="584" y="410" width="332" height="40" rx="6"/>
+  <rect x="584" y="460" width="332" height="40" rx="6"/>
+  <rect x="584" y="510" width="332" height="40" rx="6"/>
+  <rect x="584" y="560" width="332" height="40" rx="6"/>
+  <rect x="584" y="610" width="332" height="40" rx="6"/>
+  <rect x="584" y="660" width="332" height="40" rx="6"/>
+  <rect x="584" y="710" width="332" height="40" rx="6"/>
+</g>
+<g font-size="13.5" fill="#263238">
+  <text x="596" y="385">1. 100-sample RED/IR ring buffer @ 25 Hz effective</text>
+  <text x="596" y="435">2. Finger-presence gate (IR &gt; baseline + 8000)</text>
+  <text x="596" y="485">3. Window quality check (saturation / motion / flat)</text>
+  <text x="596" y="535">4. Maxim SpO₂ algorithm  +  own AC peak-count BPM</text>
+  <text x="596" y="585">5. 6-deep median filter + 3-strike re-sync</text>
+  <text x="596" y="635" fill="#B71C1C">6. Breathing rate = BPM/4 + (98 − SpO₂)·0.5  (estimate)</text>
+  <text x="596" y="685">7. 30 s averager → record</text>
+  <text x="596" y="735">8. LittleFS /history.csv  +  /profile.txt</text>
+</g>
+
+<!-- ============ SENSORS (left of MCU) ============ -->
+<g stroke="#263238" stroke-width="2.2" fill="#FFFFFF">
+  <rect x="66" y="500" width="308" height="84" rx="7"/>
+  <rect x="66" y="640" width="308" height="100" rx="7"/>
+</g>
+<text x="220" y="528" font-size="15.5" font-weight="700" text-anchor="middle" fill="#111">MAX30102 / MAX30105</text>
+<text x="220" y="550" font-size="13" text-anchor="middle" fill="#546E7A">Reflective PPG · RED 660 nm + IR 880 nm</text>
+<text x="220" y="570" font-size="13" text-anchor="middle" fill="#546E7A">addr 0x57 · fingertip</text>
+
+<text x="220" y="668" font-size="15.5" font-weight="700" text-anchor="middle" fill="#111">Plantower PMS5003</text>
+<text x="220" y="690" font-size="13" text-anchor="middle" fill="#546E7A">Laser scattering · PM1.0 / PM2.5 / PM10</text>
+<text x="220" y="710" font-size="13" text-anchor="middle" fill="#546E7A">Passive mode, polled every 5 s</text>
+<text x="220" y="730" font-size="13" text-anchor="middle" fill="#546E7A">9600 baud 8N1 · 5 V supply, 3.3 V logic</text>
+
+<path d="M374,542 L470,542 L470,470 L560,470" fill="none" stroke="#1565C0" stroke-width="3.5" marker-end="url(#arB)"/>
+<text x="382" y="534" font-size="12.5" font-weight="600" fill="#1565C0">I²C-A  GPIO6 SDA / GPIO7 SCL</text>
+
+<path d="M374,690 L470,690 L470,620 L560,620" fill="none" stroke="#6A1B9A" stroke-width="3.5" marker-end="url(#arP)"/>
+<text x="382" y="682" font-size="12.5" font-weight="600" fill="#6A1B9A">UART1  GPIO20 RX / GPIO21 TX</text>
+
+<!-- 5V to PMS -->
+<path d="M1012,716 L1012,782 L220,782 L220,740" fill="none" stroke="#D32F2F" stroke-width="3.5" marker-end="url(#arR)"/>
+
+<!-- 3V3 down-left to MAX -->
+<path d="M584,294 L500,294 L500,400 L220,400" fill="none" stroke="#EF6C00" stroke-width="0" />
+<path d="M584,294 L524,294 L524,470 L524,470" fill="none" stroke="#EF6C00" stroke-width="0"/>
+
+<!-- ============ OUTPUTS (right of MCU) ============ -->
+<g stroke="#263238" stroke-width="2.2" fill="#FFFFFF">
+  <rect x="1060" y="220" width="300" height="84" rx="7"/>
+  <rect x="1060" y="360" width="300" height="84" rx="7"/>
+</g>
+<text x="1210" y="248" font-size="15.5" font-weight="700" text-anchor="middle" fill="#111">SSD1306 OLED 0.96&quot;</text>
+<text x="1210" y="270" font-size="13" text-anchor="middle" fill="#546E7A">128 × 64 · addr 0x3C</text>
+<text x="1210" y="290" font-size="13" text-anchor="middle" fill="#546E7A">BPM / SpO₂ / PM / BLE state</text>
+
+<text x="1210" y="388" font-size="15.5" font-weight="700" text-anchor="middle" fill="#111">BLE GATT server</text>
+<text x="1210" y="410" font-size="13" text-anchor="middle" fill="#546E7A">&quot;VitalMonitor&quot; · service a1b2c3d0-0001-…</text>
+<text x="1210" y="430" font-size="13" text-anchor="middle" fill="#546E7A">6 characteristics (see table)</text>
+
+<path d="M940,262 L1060,262" fill="none" stroke="#1565C0" stroke-width="3.5" marker-end="url(#arB)"/>
+<text x="948" y="254" font-size="12.5" font-weight="600" fill="#1565C0">I²C-B  GPIO8 SDA / GPIO9 SCL (software)</text>
+
+<path d="M940,402 L1060,402" fill="none" stroke="#37474F" stroke-width="3.5" marker-end="url(#ar)"/>
+
+<!-- client app -->
+<rect x="1060" y="500" width="300" height="110" rx="7" fill="#F1F8F6" stroke="#00796B" stroke-width="2.4"/>
+<text x="1210" y="528" font-size="15.5" font-weight="700" text-anchor="middle" fill="#004D40">vitalmonitor.html</text>
+<text x="1210" y="550" font-size="13" text-anchor="middle" fill="#546E7A">Web Bluetooth client (Chrome/Edge)</text>
+<text x="1210" y="570" font-size="13" text-anchor="middle" fill="#546E7A">Live cards · profile · history sync</text>
+<text x="1210" y="590" font-size="13" text-anchor="middle" fill="#546E7A">Sends TIME:&lt;unix&gt; on every connect</text>
+
+<path d="M1210,444 L1210,500" fill="none" stroke="#00796B" stroke-width="3.5" stroke-dasharray="9 6" marker-end="url(#arG)"/>
+<text x="1222" y="478" font-size="12.5" font-weight="600" fill="#00796B">BLE 2.4 GHz</text>
+
+<rect x="1060" y="666" width="300" height="72" rx="7" fill="#FFFFFF" stroke="#263238" stroke-width="2.2"/>
+<text x="1210" y="694" font-size="15" font-weight="700" text-anchor="middle" fill="#111">PDF history report</text>
+<text x="1210" y="716" font-size="13" text-anchor="middle" fill="#546E7A">Trend chart + full measurement table</text>
+<path d="M1210,610 L1210,666" fill="none" stroke="#37474F" stroke-width="3.5" marker-end="url(#ar)"/>
+
+<!-- USB -->
+<rect x="640" y="828" width="220" height="56" rx="7" fill="#FFFFFF" stroke="#263238" stroke-width="2.2"/>
+<text x="750" y="852" font-size="14" font-weight="600" text-anchor="middle" fill="#111">USB-C (native, GPIO18/19)</text>
+<text x="750" y="872" font-size="12.5" text-anchor="middle" fill="#546E7A">firmware flash + serial debug</text>
+<path d="M750,828 L750,760" fill="none" stroke="#37474F" stroke-width="3.5" marker-end="url(#ar)"/>
+
+<text x="40" y="922" font-size="12.5" fill="#B71C1C" font-weight="600">Note: breathing rate is NOT measured from the PPG waveform — it is arithmetically derived from heart rate and SpO₂ (firmware line 51). Treat it as an indicative figure only.</text>
+<text x="40" y="944" font-size="12.5" fill="#546E7A">Note: the MAX30102 and the OLED sit on two separate I²C buses (hardware I²C on GPIO6/7, bit-banged U8g2 I²C on GPIO8/9) — they are not a shared bus.</text>
+</svg>
+</div>
+<p class="cap">Figure 1 — System block diagram. Power path in red, I²C in blue, UART in purple, BLE dashed teal.</p>
+
+<h2>2 · Connection schematic</h2>
+<div class="fig"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1580 1030" width="1580" height="1030" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<rect width="1580" height="1030" fill="#FFFFFF"/>
+
+<text x="40" y="46" font-size="26" font-weight="700" fill="#111">VitalMonitor — Connection Schematic (V1.0)</text>
+<text x="40" y="70" font-size="13.5" fill="#546E7A">Every net below is taken directly from vital_monitor.ino. Junction dot = connected. Hop over a wire = crossing, not connected.</text>
+
+<!-- ===== LEGEND ===== -->
+<rect x="700" y="20" width="840" height="110" rx="8" fill="#FAFAFA" stroke="#CFD8DC" stroke-width="1.5"/>
+<text x="716" y="44" font-size="14" font-weight="700" fill="#37474F">NET COLOUR KEY</text>
+<g font-size="13.5" fill="#37474F">
+  <line x1="716" y1="66" x2="760" y2="66" stroke="#D32F2F" stroke-width="4"/><text x="770" y="71">+5.0 V (VCC)</text>
+  <line x1="906" y1="66" x2="950" y2="66" stroke="#EF6C00" stroke-width="4"/><text x="960" y="71">+3.3 V (VCC)</text>
+  <line x1="1096" y1="66" x2="1140" y2="66" stroke="#00796B" stroke-width="4"/><text x="1150" y="71">VBAT 3.7 V</text>
+  <line x1="1286" y1="66" x2="1330" y2="66" stroke="#111111" stroke-width="4"/><text x="1340" y="71">GND</text>
+  <line x1="716" y1="100" x2="760" y2="100" stroke="#1565C0" stroke-width="4"/><text x="770" y="105">I²C SDA</text>
+  <line x1="906" y1="100" x2="950" y2="100" stroke="#2E7D32" stroke-width="4"/><text x="960" y="105">I²C SCL</text>
+  <line x1="1096" y1="100" x2="1140" y2="100" stroke="#6A1B9A" stroke-width="4"/><text x="1150" y="105">UART / USB</text>
+</g>
+
+<!-- ===== POWER RAILS ===== -->
+<line x1="140" y1="150" x2="1480" y2="150" stroke="#D32F2F" stroke-width="4"/>
+<text x="300" y="142" font-size="15" font-weight="700" fill="#D32F2F">+5.0 V RAIL</text>
+
+<line x1="800" y1="190" x2="1420" y2="190" stroke="#EF6C00" stroke-width="4"/>
+<text x="900" y="182" font-size="15" font-weight="700" fill="#EF6C00">+3.3 V RAIL  (from ESP32 on-board LDO)</text>
+
+<line x1="40" y1="970" x2="1360" y2="970" stroke="#111111" stroke-width="4"/>
+<text x="420" y="994" font-size="15" font-weight="700" fill="#111">GND  —  single common ground</text>
+
+<!-- vertical rail drops -->
+<line x1="140" y1="300" x2="140" y2="150" stroke="#D32F2F" stroke-width="4"/>
+<line x1="660" y1="260" x2="660" y2="150" stroke="#D32F2F" stroke-width="4"/>
+<circle cx="660" cy="150" r="5.5" fill="#D32F2F"/>
+<line x1="1480" y1="150" x2="1480" y2="730" stroke="#D32F2F" stroke-width="4"/>
+
+<line x1="800" y1="260" x2="800" y2="190" stroke="#EF6C00" stroke-width="4"/>
+<line x1="1420" y1="190" x2="1420" y2="530" stroke="#EF6C00" stroke-width="4"/>
+<circle cx="1420" cy="320" r="5.5" fill="#EF6C00"/>
+
+<line x1="1360" y1="420" x2="1360" y2="970" stroke="#111111" stroke-width="4"/>
+<circle cx="1360" cy="630" r="5.5" fill="#111111"/>
+<circle cx="1360" cy="870" r="5.5" fill="#111111"/>
+<line x1="730" y1="680" x2="730" y2="970" stroke="#111111" stroke-width="4"/>
+<circle cx="730" cy="970" r="5.5" fill="#111111"/>
+<line x1="40" y1="390" x2="40" y2="970" stroke="#111111" stroke-width="4"/>
+<circle cx="40" cy="600" r="5.5" fill="#111111"/>
+
+<!-- ===== BOOST ===== -->
+<rect x="90" y="300" width="180" height="120" rx="8" fill="#FFFFFF" stroke="#263238" stroke-width="2.4"/>
+<text x="180" y="336" font-size="15" font-weight="700" text-anchor="middle" fill="#111">MT3608</text>
+<text x="180" y="358" font-size="13" text-anchor="middle" fill="#546E7A">boost converter</text>
+<text x="180" y="378" font-size="13" text-anchor="middle" fill="#546E7A">set VOUT = 5.00 V</text>
+<text x="180" y="398" font-size="12" text-anchor="middle" fill="#90A4AE">(trim before connecting load)</text>
+<circle cx="140" cy="300" r="4.5" fill="#D32F2F"/><text x="152" y="294" font-size="12.5" font-weight="600" fill="#D32F2F">VOUT+</text>
+<circle cx="140" cy="420" r="4.5" fill="#00796B"/><text x="152" y="438" font-size="12.5" font-weight="600" fill="#00796B">VIN+</text>
+<circle cx="90" cy="390" r="4.5" fill="#111111"/><text x="60" y="382" font-size="12.5" font-weight="600" fill="#111">GND</text>
+<line x1="90" y1="390" x2="40" y2="390" stroke="#111111" stroke-width="4"/>
+
+<!-- ===== TP4056 ===== -->
+<rect x="90" y="500" width="180" height="140" rx="8" fill="#FFFFFF" stroke="#263238" stroke-width="2.4"/>
+<text x="180" y="536" font-size="15" font-weight="700" text-anchor="middle" fill="#111">TP4056 + DW01</text>
+<text x="180" y="558" font-size="13" text-anchor="middle" fill="#546E7A">USB-C charge module</text>
+<text x="180" y="578" font-size="13" text-anchor="middle" fill="#546E7A">1 A charge, protected</text>
+<text x="180" y="602" font-size="12.5" text-anchor="middle" fill="#6A1B9A" font-weight="600">USB-C IN = charging only</text>
+<circle cx="140" cy="500" r="4.5" fill="#00796B"/><text x="152" y="494" font-size="12.5" font-weight="600" fill="#00796B">OUT+</text>
+<circle cx="90" cy="600" r="4.5" fill="#111111"/><text x="46" y="622" font-size="12.5" font-weight="600" fill="#111">OUT−</text>
+<line x1="90" y1="600" x2="40" y2="600" stroke="#111111" stroke-width="4"/>
+<circle cx="140" cy="640" r="4.5" fill="#00796B"/><text x="118" y="662" font-size="12.5" font-weight="600" fill="#00796B">B+</text>
+<circle cx="220" cy="640" r="4.5" fill="#111111"/><text x="204" y="662" font-size="12.5" font-weight="600" fill="#111">B−</text>
+
+<line x1="140" y1="500" x2="140" y2="420" stroke="#00796B" stroke-width="4"/>
+
+<!-- ===== BATTERY ===== -->
+<rect x="90" y="740" width="180" height="100" rx="8" fill="#FFFFFF" stroke="#263238" stroke-width="2.4"/>
+<text x="180" y="778" font-size="15" font-weight="700" text-anchor="middle" fill="#111">Li-Po 3.7 V</text>
+<text x="180" y="800" font-size="13" text-anchor="middle" fill="#546E7A">2000 mAh, JST-PH 2.0</text>
+<text x="180" y="822" font-size="13" text-anchor="middle" fill="#546E7A">protected cell preferred</text>
+<circle cx="140" cy="740" r="4.5" fill="#00796B"/><text x="128" y="730" font-size="14" font-weight="700" fill="#00796B">+</text>
+<circle cx="220" cy="740" r="4.5" fill="#111111"/><text x="212" y="730" font-size="14" font-weight="700" fill="#111">−</text>
+<line x1="140" y1="740" x2="140" y2="640" stroke="#00796B" stroke-width="4"/>
+<line x1="220" y1="740" x2="220" y2="640" stroke="#111111" stroke-width="4"/>
+
+<!-- ===== USB-C PROG ===== -->
+<rect x="400" y="580" width="160" height="80" rx="8" fill="#FFFFFF" stroke="#263238" stroke-width="2.4"/>
+<text x="480" y="612" font-size="14" font-weight="700" text-anchor="middle" fill="#111">USB-C</text>
+<text x="480" y="632" font-size="12.5" text-anchor="middle" fill="#546E7A">on ESP32 board</text>
+<text x="480" y="650" font-size="12.5" text-anchor="middle" fill="#546E7A">flash + serial</text>
+<line x1="560" y1="620" x2="600" y2="620" stroke="#6A1B9A" stroke-width="4"/>
+<text x="470" y="678" font-size="12" fill="#6A1B9A" font-weight="600">D+/D− = GPIO19/18 (native)</text>
+
+<!-- ===== ESP32 ===== -->
+<rect x="600" y="260" width="270" height="420" rx="10" fill="#F3F7FC" stroke="#0D47A1" stroke-width="2.8"/>
+<text x="735" y="296" font-size="18" font-weight="700" text-anchor="middle" fill="#0D47A1">ESP32-C3</text>
+<text x="735" y="318" font-size="14.5" font-weight="600" text-anchor="middle" fill="#0D47A1">SuperMini</text>
+<text x="735" y="344" font-size="12.5" text-anchor="middle" fill="#546E7A">RISC-V 160 MHz · 4 MB flash</text>
+<text x="735" y="362" font-size="12.5" text-anchor="middle" fill="#546E7A">BLE 5.0 · on-board 3V3 LDO</text>
+
+<!-- ESP32 power pins -->
+<circle cx="660" cy="260" r="4.5" fill="#D32F2F"/><text x="608" y="250" font-size="13" font-weight="700" fill="#D32F2F">5V pin</text>
+<circle cx="800" cy="260" r="4.5" fill="#EF6C00"/><text x="812" y="250" font-size="13" font-weight="700" fill="#EF6C00">3V3 pin (out)</text>
+<circle cx="730" cy="680" r="4.5" fill="#111111"/><text x="700" y="702" font-size="13" font-weight="700" fill="#111">GND</text>
+<circle cx="600" cy="620" r="4.5" fill="#6A1B9A"/>
+
+<!-- ESP32 GPIO pins -->
+<g font-size="13" font-weight="700">
+  <circle cx="870" cy="330" r="4.5" fill="#1565C0"/><text x="862" y="326" text-anchor="end" fill="#1565C0">GPIO6  (SDA-A)</text>
+  <circle cx="870" cy="380" r="4.5" fill="#2E7D32"/><text x="862" y="376" text-anchor="end" fill="#2E7D32">GPIO7  (SCL-A)</text>
+  <circle cx="870" cy="430" r="4.5" fill="#1565C0"/><text x="862" y="426" text-anchor="end" fill="#1565C0">GPIO8  (SDA-B)</text>
+  <circle cx="870" cy="480" r="4.5" fill="#2E7D32"/><text x="862" y="476" text-anchor="end" fill="#2E7D32">GPIO9  (SCL-B)</text>
+  <circle cx="870" cy="530" r="4.5" fill="#6A1B9A"/><text x="862" y="526" text-anchor="end" fill="#6A1B9A">GPIO20 (U1RX)</text>
+  <circle cx="870" cy="580" r="4.5" fill="#6A1B9A"/><text x="862" y="576" text-anchor="end" fill="#6A1B9A">GPIO21 (U1TX)</text>
+</g>
+
+<!-- ===== SIGNAL ROUTING (no crossings) ===== -->
+<path d="M870,330 H1040 V350 H1080" fill="none" stroke="#1565C0" stroke-width="3.6"/>
+<path d="M870,380 H1012 V390 H1080" fill="none" stroke="#2E7D32" stroke-width="3.6"/>
+<path d="M870,430 H984 V560 H1080" fill="none" stroke="#1565C0" stroke-width="3.6"/>
+<path d="M870,480 H956 V600 H1080" fill="none" stroke="#2E7D32" stroke-width="3.6"/>
+<path d="M870,530 H928 V760 H1080" fill="none" stroke="#6A1B9A" stroke-width="3.6"/>
+<path d="M870,580 H900 V800 H1080" fill="none" stroke="#6A1B9A" stroke-width="3.6"/>
+
+<!-- ===== MAX30102 ===== -->
+<rect x="1080" y="290" width="240" height="150" rx="8" fill="#FFFFFF" stroke="#263238" stroke-width="2.4"/>
+<text x="1200" y="322" font-size="15" font-weight="700" text-anchor="middle" fill="#111">MAX30102 module</text>
+<text x="1200" y="342" font-size="12.5" text-anchor="middle" fill="#546E7A">PPG · I²C addr 0x57</text>
+<text x="1200" y="382" font-size="12.5" text-anchor="middle" fill="#90A4AE">INT / RD / IRD — not connected</text>
+<text x="1200" y="404" font-size="12.5" text-anchor="middle" fill="#90A4AE">on-board 4.7 kΩ pull-ups to 3V3</text>
+<circle cx="1080" cy="350" r="4.5" fill="#1565C0"/><text x="1090" y="358" font-size="13" font-weight="700" fill="#1565C0">SDA</text>
+<circle cx="1080" cy="390" r="4.5" fill="#2E7D32"/><text x="1090" y="398" font-size="13" font-weight="700" fill="#2E7D32">SCL</text>
+<circle cx="1320" cy="320" r="4.5" fill="#EF6C00"/><text x="1312" y="312" font-size="13" font-weight="700" text-anchor="end" fill="#EF6C00">VIN 3V3</text>
+<circle cx="1320" cy="420" r="4.5" fill="#111111"/><text x="1312" y="434" font-size="13" font-weight="700" text-anchor="end" fill="#111">GND</text>
+<line x1="1320" y1="320" x2="1420" y2="320" stroke="#EF6C00" stroke-width="4"/>
+<line x1="1320" y1="420" x2="1360" y2="420" stroke="#111111" stroke-width="4"/>
+
+<!-- ===== OLED ===== -->
+<rect x="1080" y="500" width="240" height="150" rx="8" fill="#FFFFFF" stroke="#263238" stroke-width="2.4"/>
+<text x="1200" y="532" font-size="15" font-weight="700" text-anchor="middle" fill="#111">SSD1306 OLED 0.96&quot;</text>
+<text x="1200" y="552" font-size="12.5" text-anchor="middle" fill="#546E7A">128 × 64 · I²C addr 0x3C</text>
+<text x="1200" y="592" font-size="12.5" text-anchor="middle" fill="#90A4AE">driven by U8g2 software I²C</text>
+<text x="1200" y="614" font-size="12.5" text-anchor="middle" fill="#90A4AE">separate bus from MAX30102</text>
+<circle cx="1080" cy="560" r="4.5" fill="#1565C0"/><text x="1090" y="568" font-size="13" font-weight="700" fill="#1565C0">SDA</text>
+<circle cx="1080" cy="600" r="4.5" fill="#2E7D32"/><text x="1090" y="608" font-size="13" font-weight="700" fill="#2E7D32">SCL</text>
+<circle cx="1320" cy="530" r="4.5" fill="#EF6C00"/><text x="1312" y="522" font-size="13" font-weight="700" text-anchor="end" fill="#EF6C00">VCC 3V3</text>
+<circle cx="1320" cy="630" r="4.5" fill="#111111"/><text x="1312" y="644" font-size="13" font-weight="700" text-anchor="end" fill="#111">GND</text>
+<path d="M1320,530 H1352 A8,8 0 0 1 1368,530 H1420" fill="none" stroke="#EF6C00" stroke-width="4"/>
+<line x1="1320" y1="630" x2="1360" y2="630" stroke="#111111" stroke-width="4"/>
+
+<!-- ===== PMS5003 ===== -->
+<rect x="1080" y="700" width="240" height="200" rx="8" fill="#FFFFFF" stroke="#263238" stroke-width="2.4"/>
+<text x="1200" y="732" font-size="15" font-weight="700" text-anchor="middle" fill="#111">Plantower PMS5003</text>
+<text x="1200" y="752" font-size="12.5" text-anchor="middle" fill="#546E7A">8-pin 1.25 mm JST · 9600 8N1</text>
+<g font-size="12.5" fill="#90A4AE">
+  <text x="1200" y="832" text-anchor="middle">pin 3 SET — leave open (idles high = run)</text>
+  <text x="1200" y="852" text-anchor="middle">pin 6 RESET — leave open</text>
+  <text x="1200" y="872" text-anchor="middle">pins 7, 8 — no connection</text>
+</g>
+<circle cx="1080" cy="760" r="4.5" fill="#6A1B9A"/><text x="1090" y="768" font-size="13" font-weight="700" fill="#6A1B9A">pin 5  TX</text>
+<circle cx="1080" cy="800" r="4.5" fill="#6A1B9A"/><text x="1090" y="808" font-size="13" font-weight="700" fill="#6A1B9A">pin 4  RX</text>
+<circle cx="1320" cy="730" r="4.5" fill="#D32F2F"/><text x="1312" y="722" font-size="13" font-weight="700" text-anchor="end" fill="#D32F2F">pin 1  VCC 5 V</text>
+<circle cx="1320" cy="870" r="4.5" fill="#111111"/><text x="1312" y="884" font-size="13" font-weight="700" text-anchor="end" fill="#111">pin 2  GND</text>
+<path d="M1320,730 H1352 A8,8 0 0 1 1368,730 H1480" fill="none" stroke="#D32F2F" stroke-width="4"/>
+<line x1="1320" y1="870" x2="1360" y2="870" stroke="#111111" stroke-width="4"/>
+
+<!-- ===== NOTES ===== -->
+<rect x="40" y="862" width="1000" height="96" rx="8" fill="#FFF8E1" stroke="#F9A825" stroke-width="1.8"/>
+<text x="56" y="886" font-size="13.5" font-weight="700" fill="#E65100">DESIGN NOTES — read before wiring</text>
+<g font-size="12.8" fill="#4E342E">
+  <text x="56" y="908">1.  PMS5003 needs 5 V for its fan and laser. A 3.7 V cell alone will not run it — the MT3608 boost is mandatory, not optional.</text>
+  <text x="56" y="928">2.  GPIO9 is the ESP32-C3 BOOT strap pin. Keep its 4.7 kΩ pull-up to 3V3 fitted so the board does not fall into download mode at power-on.</text>
+  <text x="56" y="948">3.  GPIO20/21 are the UART0 pins. Set the Arduino IDE to &quot;USB CDC On Boot: Enabled&quot;, or the PMS5003 will fight the serial monitor.</text>
+</g>
+</svg>
+</div>
+<p class="cap">Figure 2 — Module-level connection schematic. Every net verified against <code>vital_monitor.ino</code>.
+Junction dot = joined; hop = crossing without connection.</p>
+
+<h3>2.1 · Pin-to-pin connection table</h3>
+<div class="scroll">
+<table>
+<tr><th>#</th><th>From</th><th>To</th><th>Net</th><th>Wire colour</th><th>Firmware reference</th></tr>
+<tr><td>1</td><td>ESP32-C3 GPIO6</td><td>MAX30102 SDA</td><td>I²C-A data</td><td>Blue</td><td><code>Wire.begin(6, 7)</code></td></tr>
+<tr><td>2</td><td>ESP32-C3 GPIO7</td><td>MAX30102 SCL</td><td>I²C-A clock</td><td>Green</td><td><code>Wire.begin(6, 7)</code></td></tr>
+<tr><td>3</td><td>ESP32-C3 3V3</td><td>MAX30102 VIN</td><td>+3.3 V</td><td>Red</td><td>—</td></tr>
+<tr><td>4</td><td>ESP32-C3 GND</td><td>MAX30102 GND</td><td>GND</td><td>Black</td><td>—</td></tr>
+<tr><td>5</td><td>ESP32-C3 GPIO8</td><td>OLED SDA</td><td>I²C-B data</td><td>Blue</td><td><code>U8G2…SW_I2C(U8G2_R0, 9, 8, …)</code></td></tr>
+<tr><td>6</td><td>ESP32-C3 GPIO9</td><td>OLED SCL</td><td>I²C-B clock</td><td>Green</td><td>same line, clock arg = 9</td></tr>
+<tr><td>7</td><td>ESP32-C3 3V3</td><td>OLED VCC</td><td>+3.3 V</td><td>Red</td><td>—</td></tr>
+<tr><td>8</td><td>ESP32-C3 GND</td><td>OLED GND</td><td>GND</td><td>Black</td><td>—</td></tr>
+<tr><td>9</td><td>ESP32-C3 GPIO20</td><td>PMS5003 pin 5 (TX)</td><td>UART1 RX</td><td>Purple</td><td><code>#define RX_PIN 20</code></td></tr>
+<tr><td>10</td><td>ESP32-C3 GPIO21</td><td>PMS5003 pin 4 (RX)</td><td>UART1 TX</td><td>Yellow</td><td><code>#define TX_PIN 21</code></td></tr>
+<tr><td>11</td><td>+5 V rail (boost out)</td><td>PMS5003 pin 1 (VCC)</td><td>+5.0 V</td><td>Red</td><td>—</td></tr>
+<tr><td>12</td><td>GND rail</td><td>PMS5003 pin 2 (GND)</td><td>GND</td><td>Black</td><td>—</td></tr>
+<tr><td>13</td><td>+5 V rail</td><td>ESP32-C3 "5V" pin</td><td>+5.0 V</td><td>Red</td><td>—</td></tr>
+<tr><td>14</td><td>MT3608 VOUT+</td><td>+5 V rail</td><td>+5.0 V</td><td>Red</td><td>—</td></tr>
+<tr><td>15</td><td>TP4056 OUT+</td><td>MT3608 VIN+</td><td>VBAT 3.7 V</td><td>Teal</td><td>—</td></tr>
+<tr><td>16</td><td>TP4056 OUT−</td><td>GND rail</td><td>GND</td><td>Black</td><td>—</td></tr>
+<tr><td>17</td><td>Li-Po +</td><td>TP4056 B+</td><td>VBAT 3.7 V</td><td>Teal</td><td>—</td></tr>
+<tr><td>18</td><td>Li-Po −</td><td>TP4056 B−</td><td>Battery return</td><td>Black</td><td>—</td></tr>
+</table>
+</div>
+<p class="cap">PMS5003 pins 3 (SET), 6 (RESET), 7 and 8 are left open. Both idle high internally, which is the
+run state.</p>
+
+<div class="tint">
+<strong>Three wiring traps that will cost you an evening if you miss them.</strong>
+<ul style="margin:8px 0 0">
+<li><strong>GPIO9 is the boot strap pin on the ESP32-C3.</strong> If it is held low when the board resets, the chip
+enters USB download mode instead of running your sketch. It is used here as the OLED clock. Keep a
+4.7 kΩ pull-up to 3V3 on it, and do not hot-plug the OLED.</li>
+<li><strong>GPIO20/21 are the UART0 pins.</strong> If the Arduino IDE is set to "USB CDC On Boot: Disabled",
+<code>Serial</code> takes those pins and fights the PMS5003. Set it to <strong>Enabled</strong> so the serial
+monitor runs over native USB instead.</li>
+<li><strong>PMS5003 logic is 3.3 V, supply is 5 V.</strong> Its TX output is 3.3 V, so no level shifter is
+needed — but its VCC pin must see 5 V or the fan will not spin and you will get silence on the UART.</li>
+</ul>
+</div>
+
+<h3>2.2 · BLE GATT map</h3>
+<div class="scroll">
+<table>
+<tr><th>Characteristic</th><th>UUID suffix</th><th>Properties</th><th>Payload</th></tr>
+<tr><td>Service</td><td><code>…-0001-…</code></td><td>—</td><td>Advertised as <code>VitalMonitor</code></td></tr>
+<tr><td>Vitals</td><td><code>…-0002-…</code></td><td>Read, Notify (1 Hz)</td><td><code>{bpm, spo2, breathing, finger}</code></td></tr>
+<tr><td>Control</td><td><code>…-0003-…</code></td><td>Write</td><td><code>START</code> / <code>STOP</code> / <code>TIME:&lt;unix&gt;</code></td></tr>
+<tr><td>Status</td><td><code>…-0004-…</code></td><td>Read, Notify</td><td>Live + 30 s averages incl. PM1.0/2.5/10</td></tr>
+<tr><td>History</td><td><code>…-0005-…</code></td><td>Read, Write</td><td>Paged, 5 records per page</td></tr>
+<tr><td>Profile</td><td><code>…-0006-…</code></td><td>Read, Write</td><td><code>{name, age, gender}</code> → <code>/profile.txt</code></td></tr>
+<tr><td>HistorySync</td><td><code>…-0007-…</code></td><td>Write, Notify</td><td>Streamed full history, ACK per record</td></tr>
+</table>
+</div>
+
+<h2>3 · Parts list (BOM)</h2>
+<div class="scroll">
+<table>
+<tr><th>Ref</th><th>Part</th><th>Exact model</th><th>Qty</th><th>Key spec</th><th>Approx. ₹</th></tr>
+<tr><td>U1</td><td>Microcontroller</td><td>ESP32-C3 SuperMini</td><td>1</td><td>RISC-V 160 MHz, 4 MB flash, BLE 5.0, native USB-C, on-board 3V3 LDO</td><td>250</td></tr>
+<tr><td>U2</td><td>PPG sensor</td><td>MAX30105 breakout (MAX30102 also fits)</td><td>1</td><td>RED 660 nm + IR 880 nm, I²C 0x57, on-board pull-ups</td><td>200</td></tr>
+<tr><td>U3</td><td>Particulate sensor</td><td>Plantower PMS5003</td><td>1</td><td>Laser scattering, PM1.0/2.5/10, 5 V supply, 3.3 V UART 9600 8N1</td><td>1400</td></tr>
+<tr><td>U4</td><td>Display</td><td>SSD1306 OLED 0.96"</td><td>1</td><td>128 × 64 mono, I²C 0x3C</td><td>180</td></tr>
+<tr><td>U5</td><td>Charger</td><td>TP4056 + DW01 USB-C module</td><td>1</td><td>1 A CC/CV, over-discharge + over-current protection</td><td>60</td></tr>
+<tr><td>U6</td><td>Boost converter</td><td>MT3608 module</td><td>1</td><td>2–24 V in, adjustable out, set to 5.00 V, ≥ 500 mA</td><td>50</td></tr>
+<tr><td>BT1</td><td>Battery</td><td>Li-Po 3.7 V</td><td>1</td><td>2000 mAh, JST-PH 2.0, protected cell</td><td>400</td></tr>
+<tr><td>R1–R2</td><td>Pull-up resistors</td><td>4.7 kΩ 0805 / through-hole</td><td>2</td><td>I²C-B (GPIO8/9) pull-ups to 3V3</td><td>20</td></tr>
+<tr><td>J1</td><td>Sensor cable</td><td>PMS5003 8-pin 1.25 mm JST harness</td><td>1</td><td>Supplied with sensor; extend to 150 mm if mounting externally</td><td>60</td></tr>
+<tr><td>—</td><td>Enclosure</td><td>3D-printed PLA, two-part</td><td>1</td><td>Vents over PMS inlet/outlet, fingertip window, USB-C cut-out</td><td>250</td></tr>
+<tr><td>—</td><td>Consumables</td><td>Headers, 26 AWG wire, foam tape, M3 × 6 screws</td><td>—</td><td>—</td><td>150</td></tr>
+<tr><th colspan="5" style="text-align:right">Estimated build cost, single unit</th><th>≈ ₹3,020</th></tr>
+</table>
+</div>
+<p class="cap">Prices are indicative Indian retail, September 2026. The PMS5003 is roughly half the bill
+on its own — worth noting if a cost-reduced V2 is ever scoped.</p>
+
+<h3>3.1 · Power budget</h3>
+<div class="scroll">
+<table>
+<tr><th>Load</th><th>Rail</th><th>Typical current</th><th>Notes</th></tr>
+<tr><td>PMS5003 (fan + laser, continuous)</td><td>5 V</td><td>~90 mA</td><td>Dominant load. ~200 µA in standby if SET is driven low</td></tr>
+<tr><td>ESP32-C3, BLE connected</td><td>3.3 V</td><td>~45 mA avg</td><td>Peaks ~120 mA on radio bursts</td></tr>
+<tr><td>MAX30105 (LEDs at 0x5F)</td><td>3.3 V</td><td>~12 mA</td><td>Only while a finger is present</td></tr>
+<tr><td>SSD1306 OLED</td><td>3.3 V</td><td>~15 mA</td><td>Scales with lit pixel count</td></tr>
+<tr><th colspan="2">Total drawn from the 3.7 V cell (boost ≈ 85 % efficient)</th><th colspan="2">≈ 230 mA</th></tr>
+</table>
+</div>
+<p><strong>Predicted runtime on 2000 mAh: ≈ 8 hours.</strong> On the 1000 mAh cell in the original spec it is
+≈ 4 hours — exactly at the spec's stated minimum, with no margin. This has not been measured yet; see the
+open items in §5.</p>
+
+<h2>4 · Build log</h2>
+<div class="tint">
+<strong>How to use this section.</strong> Entries marked with a highlighted date are reconstructed from
+evidence in the code comments and the 21 Sep measurement file — the <em>technical content</em> is real,
+the <em>dates</em> are my best ordering and you must replace them with your actual working dates before
+submitting this. A lab notebook with invented dates is worse than no lab notebook. Entry 7 onward is
+anchored to real timestamps in <code>vitalmonitor-history-1790004715936.pdf</code>.
+</div>
+
+<div class="log">
+<h4>1 · First light — sensors on a breadboard <span class="pill p">partial</span></h4>
+<p class="d"><span class="fill">Date: ____________</span></p>
+<ul>
+<li>MAX30105 brought up on hardware I²C (GPIO6/7). Device ACKed at 0x57 on first try.</li>
+<li>SSD1306 refused to appear on the same bus. Rather than debug address/timing conflicts, the OLED was
+moved to a second, software-bit-banged bus on GPIO8/9 using U8g2's <code>SW_I2C</code> constructor.</li>
+<li><strong>Consequence carried forward:</strong> this is why the spec sheet's "shared SDA/SCL" line is wrong,
+and why GPIO9 — a boot strap pin — ended up carrying a clock signal.</li>
+</ul>
+</div>
+
+<div class="log">
+<h4>2 · PMS5003 silent on UART <span class="pill f">failure → fixed</span></h4>
+<p class="d"><span class="fill">Date: ____________</span></p>
+<ul>
+<li>No frames returned. Two causes, both real:</li>
+<li><strong>Supply.</strong> The sensor was fed 3.3 V. Its fan did not spin. Moved to a 5 V boost output.</li>
+<li><strong>Pin contention.</strong> GPIO20/21 are UART0. With USB CDC disabled, <code>Serial</code> owned them.
+Switched the board setting to <em>USB CDC On Boot: Enabled</em> so debug output goes over native USB.</li>
+<li>Switched the driver to <code>pms.passiveMode()</code> with an explicit <code>requestRead()</code> every
+5 s, plus a 2.5 s timeout that clears <code>pmsWaiting</code> so a lost frame cannot deadlock the loop.</li>
+</ul>
+</div>
+
+<div class="log">
+<h4>3 · Heart-rate reading jumping 40–180 bpm <span class="pill f">failure → fixed</span></h4>
+<p class="d"><span class="fill">Date: ____________</span></p>
+<ul>
+<li>The Maxim reference algorithm alone was unusable on a loosely held finger.</li>
+<li>Added an independent BPM path: 3-sample smoothing, 21-sample moving-average baseline removal, then
+peak counting with the threshold at 62 % of AC amplitude and a minimum peak spacing derived from a
+160 bpm ceiling. Requires ≥ 3 peaks before reporting.</li>
+<li>Added a window quality gate (<code>windowIsClean</code>): reject if IR saturates above 220 000, if AC
+swing is under 500 counts (finger too light), or over 8 000 counts (motion).</li>
+</ul>
+</div>
+
+<div class="log">
+<h4>4 · Finger detection false-triggering on ambient light <span class="pill f">failure → fixed</span></h4>
+<p class="d"><span class="fill">Date: ____________</span></p>
+<ul>
+<li>A fixed IR threshold worked at a desk and failed near a window.</li>
+<li>Replaced with an adaptive baseline: whenever IR &lt; 10 000, the no-finger baseline is updated with a
+7:1 exponential average. Finger presence now means IR &gt; baseline + 8 000.</li>
+<li>Added a 3 s settling delay (<code>SETTLE_MS</code>) after finger-on before any value is published.</li>
+</ul>
+</div>
+
+<div class="log">
+<h4>5 · Median filter sticking on a stale value <span class="pill f">failure → fixed</span></h4>
+<p class="d"><span class="fill">Date: ____________</span></p>
+<ul>
+<li>A 6-deep median rejects outliers well, but when the real heart rate genuinely changed, the filter
+kept suppressing the new value as an outlier.</li>
+<li>Added a 3-strike re-sync: if three consecutive readings disagree with the median by &gt; 20 bpm
+(&gt; 4 % for SpO₂) but agree with each other within 10 bpm (2 %), the history is flushed and the filter
+re-locks on the new level.</li>
+</ul>
+</div>
+
+<div class="log">
+<h4>6 · BLE history transfer truncating <span class="pill f">failure → fixed</span></h4>
+<p class="d"><span class="fill">Date: ____________</span></p>
+<ul>
+<li>History was first paged 8 records at a time. A GATT characteristic value is capped at 512 bytes and a
+record grew to ~75 bytes of JSON once timestamps became 10-digit Unix seconds — 8 records overflowed.
+Page size reduced to 5 (~400 bytes).</li>
+<li>The original reader loaded up to 64 lines into a <code>String</code> array, which both capped history
+and risked heap fragmentation. Rewrote <code>HistorySync</code> to seek backward through
+<code>/history.csv</code> one line at a time, so RAM use is O(1) regardless of file size.</li>
+<li>Added per-record ACK, a single retry, and a 3 s timeout so a dropped notification cannot hang the
+transfer.</li>
+</ul>
+</div>
+
+<div class="log">
+<h4>7 · Records saving with no timestamp <span class="pill f">failure → fixed</span></h4>
+<p class="d">21 September 2026 — before 18:48</p>
+<ul>
+<li><strong>Direct evidence:</strong> records 1–7 in the exported history read "Time not set".</li>
+<li>Cause: the ESP32-C3 has no battery-backed RTC, so wall-clock time is lost at every power-off. Records
+were being written with <code>ts = 0</code>.</li>
+<li>Fix: the web app now writes <code>TIME:&lt;unix epoch&gt;</code> to the control characteristic on every
+connect; the firmware validates it is after 1 Jan 2020 before calling <code>settimeofday()</code>.</li>
+<li>Records 8 onward carry real timestamps. The fix works.</li>
+</ul>
+</div>
+
+<div class="log">
+<h4>8 · First continuous data session <span class="pill p">partial</span></h4>
+<p class="d">21 September 2026, 18:48 → 20:59 (2 h 11 min)</p>
+<ul>
+<li>28 records captured. No resets observed across the session — this clears the spec's "30 minutes without
+resets" criterion with a wide margin.</li>
+<li><strong>8 of 28 records (29 %) saved with BPM = 0 and SpO₂ = 0</strong> — records 6, 7, 14–19. PM values
+were still valid in most of them, so the PMS path was healthy and the PPG path was not. Cause is finger
+placement: the 30 s averager only accumulates when <code>shownBPM &gt; 0</code>, so a finger that shifted
+mid-measurement yields a zero record rather than a partial one.</li>
+<li>Record 7 alone has PM = 0 as well — a single PMS frame timeout.</li>
+<li><strong>SpO₂ is not trustworthy.</strong> Across the session it ranged 71 % to 100 %, mean ≈ 86 %, on a
+healthy 22-year-old who should read 96–99 %. Records 21–23 read 99.9 %, 100 %, 100 % — above the physical
+ceiling of the algorithm's useful range. This channel needs calibration work before any result is quoted.</li>
+</ul>
+</div>
+
+<div class="log">
+<h4>9 · Open — not yet done <span class="pill f">outstanding</span></h4>
+<p class="d"><span class="fill">Date: ____________</span></p>
+<ul>
+<li>Battery runtime never measured. The 4-hour spec criterion is currently a calculation, not a result.</li>
+<li>No reference comparison for HR, SpO₂ or PM. Nothing here has been validated against a known-good
+instrument.</li>
+<li>PCB not fabricated. The build is still module-and-wire.</li>
+<li>Enclosure not printed.</li>
+</ul>
+</div>
+
+<h2>5 · Technical write-up</h2>
+
+<h3>5.1 · Objective</h3>
+<p>Build a low-cost, battery-powered device that measures ambient particulate concentration and fingertip
+cardiovascular signals at the same time, on the same timestamp, so that the two can later be examined
+together. The pairing is the point: PM exposure data and vitals data both exist separately and cheaply,
+but co-located and co-timed on one wearable unit they become a single record. This is an engineering
+prototype for demonstration, not a medical device, and nothing it outputs should be used clinically.</p>
+
+<h3>5.2 · Method</h3>
+<p><strong>Particulate path.</strong> A Plantower PMS5003 draws air past a laser and counts scattering
+events, returning PM1.0, PM2.5 and PM10 in µg/m³ over a 9600 baud UART. It runs in passive mode: the
+firmware issues a read request every 5 seconds and abandons the attempt after 2.5 seconds so a lost frame
+cannot stall the main loop.</p>
+<p><strong>Cardiovascular path.</strong> A MAX30105 illuminates the fingertip with 660 nm red and 880 nm
+infrared LEDs and measures reflected light. Blood volume pulses modulate the reflected intensity. The
+firmware maintains a 100-sample rolling buffer at an effective 25 Hz (100 Hz sample rate, 4× hardware
+averaging) and processes it two ways in parallel:</p>
+<ul>
+<li><em>Heart rate</em> — 3-sample smoothing, then a 21-sample moving average subtracted to remove the DC
+baseline, leaving the AC pulsatile component. Peaks above 62 % of AC amplitude and spaced at least
+<code>25 × 60 / 160</code> samples apart are counted; BPM is derived from the mean peak interval. At least
+three peaks are required.</li>
+<li><em>SpO₂</em> — Maxim's reference red/IR ratio algorithm, run only on windows that pass the quality gate.</li>
+</ul>
+<p>Both outputs feed a 6-deep median filter with a 3-strike re-sync escape hatch, so brief noise is
+rejected but a genuine physiological change is not suppressed indefinitely.</p>
+<p><strong>Quality gating.</strong> A window is discarded if the IR channel saturates (&gt; 220 000 counts),
+if AC swing is below 500 counts (finger resting too lightly), or above 8 000 counts (motion). Finger
+presence uses an adaptive baseline rather than a fixed threshold, followed by a 3 second settling delay.</p>
+<p><strong>Measurement protocol.</strong> The app writes <code>START</code>; the firmware averages every
+channel for 30 seconds, then appends one CSV record to LittleFS and notifies the app. Time comes from the
+phone — there is no RTC on board — via <code>TIME:&lt;unix&gt;</code> on each connect.</p>
+<p><strong>Interface.</strong> Live values appear on a 128 × 64 OLED and are notified over BLE at 1 Hz to a
+single-file Web Bluetooth client, which also pulls full history with per-record acknowledgement and renders
+a PDF report.</p>
+
+<div class="warn">
+<strong>Breathing rate — what it actually is.</strong> The specification describes it as derived from PPG
+waveform analysis. It is not. The firmware computes
+<code>RR = BPM/4 + (98 − SpO₂) × 0.5</code>, clamped to 8–40 br/min. This encodes the textbook resting
+HR:RR ratio of roughly 4:1 and nudges it upward when saturation falls. It contains <em>no independent
+information</em> — it is a restatement of the heart rate and SpO₂ already displayed. Real PPG-derived
+respiration requires extracting respiratory sinus arrhythmia or the 0.15–0.4 Hz baseline wander from the
+PPG signal, neither of which this firmware does. Present this figure as a derived index, never as a
+measurement, or the write-up is dishonest.
+</div>
+
+<h3>5.3 · Results</h3>
+<p>Data below is the complete 21 September 2026 session: 28 records over 2 hours 11 minutes, one subject
+(male, 22), indoor, Hyderabad.</p>
+<div class="scroll">
+<table>
+<tr><th>Channel</th><th>Valid records</th><th>Mean</th><th>Range</th><th>Assessment</th></tr>
+<tr><td>Heart rate</td><td>20 / 28 (71 %)</td><td>87.8 bpm</td><td>69 – 118 bpm</td><td><strong>Plausible.</strong> Sits in the normal resting-to-mildly-elevated band.</td></tr>
+<tr><td>SpO₂</td><td>18 / 28 (64 %)</td><td>86.4 %</td><td>71 – 100 %</td><td><strong>Not usable.</strong> A healthy 22-year-old reads 96–99 %. Spread of 29 points is noise, not physiology.</td></tr>
+<tr><td>PM1.0</td><td>24 / 28 (86 %)</td><td>50.7 µg/m³</td><td>28 – 61.4</td><td><strong>Plausible.</strong></td></tr>
+<tr><td>PM2.5</td><td>24 / 28 (86 %)</td><td>65.1 µg/m³</td><td>43 – 86.8</td><td><strong>Plausible.</strong> Above India's 60 µg/m³ 24-h NAAQS limit and ~4× the WHO guideline.</td></tr>
+<tr><td>PM10</td><td>24 / 28 (86 %)</td><td>77.8 µg/m³</td><td>62.7 – 100</td><td><strong>Plausible.</strong></td></tr>
+</table>
+</div>
+
+<div class="ok">
+<strong>The strongest single validity check in the dataset:</strong> in all 24 valid PM records the ordering
+PM1.0 &lt; PM2.5 &lt; PM10 holds without exception. These are cumulative mass fractions, so that ordering is
+physically required. An uninitialised or noise-driven sensor would violate it. This is good evidence the
+particulate path is genuinely working, independent of whether the absolute numbers are accurate.
+</div>
+
+<p><strong>Against the V1.0 success criteria:</strong></p>
+<div class="scroll">
+<table>
+<tr><th>Criterion</th><th>Status</th><th>Evidence</th></tr>
+<tr><td>Device powers on reliably</td><td>Met</td><td>Full session, no resets</td></tr>
+<tr><td>PM2.5 updates every 5 s</td><td>Met</td><td>Passive-mode polling, verified in serial log</td></tr>
+<tr><td>HR and estimated RR displayed</td><td>Met, with caveat</td><td>RR is derived, not measured</td></tr>
+<tr><td>BLE transmits to phone/laptop</td><td>Met</td><td>Web Bluetooth client, live + history + PDF</td></tr>
+<tr><td>≥ 30 min stable, no resets</td><td>Met</td><td>2 h 11 min continuous</td></tr>
+<tr><td>≥ 4 h battery operation</td><td><strong>Not tested</strong></td><td>Calculated ≈ 8 h on 2000 mAh; no measurement</td></tr>
+</table>
+</div>
+
+<h3>5.4 · Limitations</h3>
+<ol>
+<li><strong>SpO₂ is the weakest link and the most likely thing to be challenged.</strong> A mean of 86 % on a
+healthy subject is a device fault, not a finding. Reflective PPG off a fingertip is intrinsically harder
+than transmissive, and the Maxim reference algorithm is uncalibrated. No result from this channel should
+be quoted as a saturation value.</li>
+<li><strong>Breathing rate carries no independent information.</strong> See §5.2. It is a function of the
+other two outputs.</li>
+<li><strong>29 % of measurements captured nothing.</strong> The averager only accumulates when a pulse is
+being tracked, so a finger that shifts mid-window produces a zero record rather than a shortened one. This
+is a firmware design choice worth revisiting.</li>
+<li><strong>No reference instrument, anywhere.</strong> Nothing here has been compared against a clinical
+pulse oximeter or a calibrated PM reference. Every "plausible" above means "internally consistent", not
+"accurate".</li>
+<li><strong>n = 1.</strong> One subject, one indoor location, one two-hour window. No claim about population
+behaviour, exposure–response, or diurnal PM variation can be supported.</li>
+<li><strong>PM sampling is co-located with the wearer's hand, not their breathing zone.</strong> The PMS5003
+is in the same enclosure as the finger sensor, so what it measures is the air near the device, not
+inhaled air.</li>
+<li><strong>No RTC.</strong> Timestamps depend on the phone connecting. A record saved before the app
+connects is written with <code>ts = 0</code> and is time-orphaned — this already happened to 7 of 28
+records.</li>
+<li><strong>Battery life unverified</strong>, and the original 1000 mAh spec leaves no margin on the 4-hour
+target.</li>
+<li><strong>GPIO9 as an OLED clock is a latent reliability risk</strong> — it is the boot strap pin. It has
+not caused a failure yet, which is not the same as being safe.</li>
+</ol>
+
+<h3>5.5 · What V2 should do first</h3>
+<ol>
+<li>Borrow a clinical pulse oximeter and run 20 side-by-side measurements. Until that exists, the SpO₂
+number is unpublishable.</li>
+<li>Either implement genuine respiratory extraction from the PPG baseline wander, or remove the breathing
+rate display entirely. Keeping a fake channel is worse than having no channel.</li>
+<li>Run the battery flat once, with a stopwatch, and write the number down.</li>
+<li>Move the OLED clock off GPIO9 to a free pin (GPIO2, 3, 4, 5 and 10 are all available).</li>
+<li>Save partial records with a validity count instead of discarding them as zeros.</li>
+</ol>
+
+<hr>
+<p class="meta">Diagrams generated from <code>vital_monitor.ino</code> and <code>vitalmonitor.html</code>.
+Measurement statistics computed from all 28 records in
+<code>vitalmonitor-history-1790004715936.pdf</code>.</p>
+
+</div>
+</body>
+</html>

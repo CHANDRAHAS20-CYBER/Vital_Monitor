@@ -1,0 +1,164 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 960" width="1500" height="960" font-family="Segoe UI, Helvetica, Arial, sans-serif" xmlns:c2pa="http://c2pa.org/manifest"><metadata><c2pa:manifest>AAAWgmp1bWIAAAAeanVtZGMycGEAEQAQgAAAqgA4m3EDYzJwYQAAABZcanVtYgAAAEdqdW1kYzJtYQARABCAAACqADibcQN1cm46YzJwYTo3YTY4MWI5ZC1iMTk5LTRmOTctYTMyZC02Mzk3NDVkZTE3ZmIAAAADl2p1bWIAAAApanVtZGMyYXMAEQAQgAAAqgA4m3EDYzJwYS5hc3NlcnRpb25zAAAAALxqdW1iAAAARGp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuaW5ncmVkaWVudC52MwAAAAAYYzJzaKr8ibivS2bvzJ8xizigL9MAAABwY2JvcqNpZGM6Zm9ybWF0bWltYWdlL3N2Zyt4bWxqaW5zdGFuY2VJRHgseG1wOmlpZDpkM2M3YmFmMy01NmM1LTQ2MjktYjIzZS0wODQ4Y2U3YTlkNGFscmVsYXRpb25zaGlwaHBhcmVudE9mAAAB4mp1bWIAAABBanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5hY3Rpb25zLnYyAAAAABhjMnNobUHzRGzIg491AZ2dNdRuOgAAAZljYm9yomdhY3Rpb25zgqJmYWN0aW9ua2MycGEub3BlbmVkanBhcmFtZXRlcnOha2luZ3JlZGllbnRzgaJjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFggrG1rGrs7tkKSx/cjyMSZXrQP/uf5/GCV8tdy5jZPcimkZmFjdGlvbngdY29tLmFudGhyb3BpYy5jbGF1ZGUucHJvdmlkZWRqcGFyYW1ldGVyc6F4H2NvbS5hbnRocm9waWMub3JpZ2luLWNvbmZpZGVuY2VndW5rbm93bmtkZXNjcmlwdGlvbnhmQ2xhdWRlIHByb3ZpZGVkIHRoaXMgZmlsZSBhdCB0aGUgcmVxdWVzdCBvZiBhIHVzZXIgYW5kIG1heSBoYXZlIGNyZWF0ZWQgb3IgbW9kaWZpZWQgdGhlIGZpbGUgY29udGVudHMubXNvZnR3YXJlQWdlbnShZG5hbWVmQ2xhdWRlcmFsbEFjdGlvbnNJbmNsdWRlZPUAAADIanVtYgAAAEBqdW1kY2JvcgARABCAAACqADibcRNjMnBhLmhhc2guZGF0YQAAAAAYYzJzaP/MpUtK4Q5uKSqNAwRAAdQAAACAY2JvcqVjYWxnZnNoYTI1NmNwYWRNAAAAAAAAAAAAAAAAAGRoYXNoWCBvzmMpEHpGVoVkklAC+I4u7vKgl6xYSY5rN4K37QwmiGRuYW1lbmp1bWJmIG1hbmlmZXN0amV4Y2x1c2lvbnOBomVzdGFydBjNZmxlbmd0aBkeBAAAAj5qdW1iAAAAJ2p1bWRjMmNsABEAEIAAAKoAOJtxA2MycGEuY2xhaW0udjIAAAACD2Nib3KlY2FsZ2ZzaGEyNTZpc2lnbmF0dXJleE1zZWxmI2p1bWJmPS9jMnBhL3VybjpjMnBhOjdhNjgxYjlkLWIxOTktNGY5Ny1hMzJkLTYzOTc0NWRlMTdmYi9jMnBhLnNpZ25hdHVyZWppbnN0YW5jZUlEeCx4bXA6aWlkOmNiMTQxMTlmLWU0NzgtNDE4OC05YjllLThiMDk1NzlkYjE5N3JjcmVhdGVkX2Fzc2VydGlvbnODomN1cmx4LXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaW5ncmVkaWVudC52M2RoYXNoWCCsbWsauzu2QpLH9yPIxJletA/+5/n8YJXy13LmNk9yKaJjdXJseCpzZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmFjdGlvbnMudjJkaGFzaFggIgzIq1uzL6nKxUNhhEeP/l94TdCGPb+TjOfpvkfMWu+iY3VybHgpc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5oYXNoLmRhdGFkaGFzaFgg1vdt1OR891wOEyRKUhXUPuZm/x3qYMfiSXH2xnSa8Gx0Y2xhaW1fZ2VuZXJhdG9yX2luZm+jZG5hbWVvQW50aHJvcGljIEZpbGVzZ3ZlcnNpb25lMS4wLjBrc3BlY1ZlcnNpb25lMi40LjAAABA4anVtYgAAAChqdW1kYzJjcwARABCAAACqADibcQNjMnBhLnNpZ25hdHVyZQAAABAIY2JvctKEWQISogEmGCFZAgowggIGMIIBjaADAgECAhRA5aAK7sI50L64g/oGQgU9Z1UTADAKBggqhkjOPQQDAzBJMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEuMCwGA1UEAxMlQW50aHJvcGljIENvbnRlbnQgQ3JlZGVudGlhbHMgUm9vdCBDQTAeFw0yNjA4MDcxODQzNTZaFw0yODA4MDYxOTQzNTZaMEQxFzAVBgNVBAoTDkFudGhyb3BpYywgUEJDMSkwJwYDVQQDEyBBbnRocm9waWMgQ2xhdWRlIENvbnRlbnQgU2lnbmluZzBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABJh6CmvLUBgFFNU0vUKlOVtE6djd17L5SuwX0LemFisBM3dkd/3cyjxFA3Qo5S46fX0/ihY0VZ7mfb9KF703t5OjWDBWMA4GA1UdDwEB/wQEAwIHgDAVBgNVHSUEDjAMBgorBgEEAYPoXgIBMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUzlHiBIFOZFsj+OPEz5o+nMHXXMIwCgYIKoZIzj0EAwMDZwAwZAIwMXMdFJ4BetLLVY7ORuE9noqbbAZOZn/aArXyTwFAZfKrPzxF2vPoJNf1+UCdg1XGAjBwX1zd9WGqYkqmL5SFqw1QySjr1zJfpJM9+1rdDwSPLMOPOjKuiXjoU/pUUeG9RwmhY3BhZFkNngAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPZYQNbAFSqaXk/lIbvFcjFJeQet2MTAKVhi3zNjiPd1PW0whDUv6hsmE9V6Wi4uGXEYQW9mwLmv62bmSIn++I9zUsI=</c2pa:manifest></metadata>
+<defs>
+  <marker id="ar" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+    <path d="M0,0 L10,4 L0,8 Z" fill="#37474F"/>
+  </marker>
+  <marker id="arR" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+    <path d="M0,0 L10,4 L0,8 Z" fill="#D32F2F"/>
+  </marker>
+  <marker id="arB" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+    <path d="M0,0 L10,4 L0,8 Z" fill="#1565C0"/>
+  </marker>
+  <marker id="arP" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+    <path d="M0,0 L10,4 L0,8 Z" fill="#6A1B9A"/>
+  </marker>
+  <marker id="arG" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+    <path d="M0,0 L10,4 L0,8 Z" fill="#00796B"/>
+  </marker>
+</defs>
+
+<rect width="1500" height="960" fill="#FFFFFF"/>
+
+<text x="40" y="48" font-size="27" font-weight="700" fill="#111">VitalMonitor — System Block Diagram (V1.0)</text>
+<text x="40" y="74" font-size="14" fill="#546E7A">PM2.5 + PPG vitals monitor · ESP32-C3 SuperMini · derived from vital_monitor.ino and vitalmonitor.html</text>
+
+<!-- legend -->
+<g font-size="13" fill="#37474F">
+  <rect x="1010" y="28" width="460" height="62" rx="6" fill="#FAFAFA" stroke="#CFD8DC"/>
+  <line x1="1026" y1="48" x2="1066" y2="48" stroke="#D32F2F" stroke-width="3.5"/><text x="1074" y="52">Power</text>
+  <line x1="1146" y1="48" x2="1186" y2="48" stroke="#1565C0" stroke-width="3.5"/><text x="1194" y="52">I²C</text>
+  <line x1="1266" y1="48" x2="1306" y2="48" stroke="#6A1B9A" stroke-width="3.5"/><text x="1314" y="52">UART</text>
+  <line x1="1026" y1="74" x2="1066" y2="74" stroke="#00796B" stroke-width="3.5"/><text x="1074" y="78">BLE (wireless)</text>
+  <line x1="1266" y1="74" x2="1306" y2="74" stroke="#37474F" stroke-width="3.5"/><text x="1314" y="78">Data flow</text>
+</g>
+
+<!-- ============ POWER SUBSYSTEM ============ -->
+<rect x="40" y="110" width="360" height="330" rx="10" fill="#FFF5F5" stroke="#D32F2F" stroke-width="2" stroke-dasharray="7 5"/>
+<text x="56" y="136" font-size="15" font-weight="700" fill="#D32F2F">POWER SUBSYSTEM</text>
+
+<g stroke="#263238" stroke-width="2.2" fill="#FFFFFF">
+  <rect x="66" y="356" width="308" height="62" rx="7"/>
+  <rect x="66" y="262" width="308" height="62" rx="7"/>
+  <rect x="66" y="168" width="308" height="62" rx="7"/>
+</g>
+<text x="220" y="382" font-size="15" font-weight="600" text-anchor="middle" fill="#111">Li-Po cell 3.7 V nominal</text>
+<text x="220" y="402" font-size="13" text-anchor="middle" fill="#546E7A">1000–2000 mAh, JST-PH 2.0</text>
+
+<text x="220" y="288" font-size="15" font-weight="600" text-anchor="middle" fill="#111">TP4056 + DW01 module</text>
+<text x="220" y="308" font-size="13" text-anchor="middle" fill="#546E7A">USB-C charge 1 A · over-discharge cut-off</text>
+
+<text x="220" y="194" font-size="15" font-weight="600" text-anchor="middle" fill="#111">MT3608 boost 3.7 V → 5.0 V</text>
+<text x="220" y="214" font-size="13" text-anchor="middle" fill="#546E7A">needed for the PMS5003 fan + laser</text>
+
+<line x1="220" y1="356" x2="220" y2="332" stroke="#D32F2F" stroke-width="3.5" marker-end="url(#arR)"/>
+<line x1="220" y1="262" x2="220" y2="238" stroke="#D32F2F" stroke-width="3.5" marker-end="url(#arR)"/>
+
+<!-- rails out -->
+<path d="M374,199 L440,199 L440,300 L560,300" fill="none" stroke="#D32F2F" stroke-width="3.5" marker-end="url(#arR)"/>
+<text x="452" y="192" font-size="13" font-weight="600" fill="#D32F2F">+5.0 V rail</text>
+
+<path d="M440,199 L440,110 L1012,110 L1012,690" fill="none" stroke="#D32F2F" stroke-width="3.5"/>
+<line x1="1012" y1="690" x2="1012" y2="716" stroke="#D32F2F" stroke-width="3.5" marker-end="url(#arR)"/>
+<circle cx="440" cy="199" r="5" fill="#D32F2F"/>
+<text x="1024" y="104" font-size="13" font-weight="600" fill="#D32F2F">+5.0 V to PMS5003</text>
+
+<!-- ============ MCU ============ -->
+<rect x="560" y="200" width="380" height="560" rx="12" fill="#F3F7FC" stroke="#1565C0" stroke-width="2.6"/>
+<text x="750" y="234" font-size="19" font-weight="700" text-anchor="middle" fill="#0D47A1">ESP32-C3 SuperMini</text>
+<text x="750" y="256" font-size="13" text-anchor="middle" fill="#546E7A">RISC-V 160 MHz · 4 MB flash · BLE 5.0 · native USB</text>
+
+<rect x="584" y="272" width="332" height="44" rx="6" fill="#FFFFFF" stroke="#90A4AE"/>
+<text x="750" y="300" font-size="14" text-anchor="middle" fill="#111">On-board 3.3 V LDO  →  +3V3 rail (sensors, OLED)</text>
+
+<text x="584" y="348" font-size="14" font-weight="700" fill="#0D47A1">FIRMWARE SIGNAL CHAIN</text>
+
+<g stroke="#90A4AE" stroke-width="1.8" fill="#FFFFFF">
+  <rect x="584" y="360" width="332" height="40" rx="6"/>
+  <rect x="584" y="410" width="332" height="40" rx="6"/>
+  <rect x="584" y="460" width="332" height="40" rx="6"/>
+  <rect x="584" y="510" width="332" height="40" rx="6"/>
+  <rect x="584" y="560" width="332" height="40" rx="6"/>
+  <rect x="584" y="610" width="332" height="40" rx="6"/>
+  <rect x="584" y="660" width="332" height="40" rx="6"/>
+  <rect x="584" y="710" width="332" height="40" rx="6"/>
+</g>
+<g font-size="13.5" fill="#263238">
+  <text x="596" y="385">1. 100-sample RED/IR ring buffer @ 25 Hz effective</text>
+  <text x="596" y="435">2. Finger-presence gate (IR &gt; baseline + 8000)</text>
+  <text x="596" y="485">3. Window quality check (saturation / motion / flat)</text>
+  <text x="596" y="535">4. Maxim SpO₂ algorithm  +  own AC peak-count BPM</text>
+  <text x="596" y="585">5. 6-deep median filter + 3-strike re-sync</text>
+  <text x="596" y="635" fill="#B71C1C">6. Breathing rate = BPM/4 + (98 − SpO₂)·0.5  (estimate)</text>
+  <text x="596" y="685">7. 30 s averager → record</text>
+  <text x="596" y="735">8. LittleFS /history.csv  +  /profile.txt</text>
+</g>
+
+<!-- ============ SENSORS (left of MCU) ============ -->
+<g stroke="#263238" stroke-width="2.2" fill="#FFFFFF">
+  <rect x="66" y="500" width="308" height="84" rx="7"/>
+  <rect x="66" y="640" width="308" height="100" rx="7"/>
+</g>
+<text x="220" y="528" font-size="15.5" font-weight="700" text-anchor="middle" fill="#111">MAX30102 / MAX30105</text>
+<text x="220" y="550" font-size="13" text-anchor="middle" fill="#546E7A">Reflective PPG · RED 660 nm + IR 880 nm</text>
+<text x="220" y="570" font-size="13" text-anchor="middle" fill="#546E7A">addr 0x57 · fingertip</text>
+
+<text x="220" y="668" font-size="15.5" font-weight="700" text-anchor="middle" fill="#111">Plantower PMS5003</text>
+<text x="220" y="690" font-size="13" text-anchor="middle" fill="#546E7A">Laser scattering · PM1.0 / PM2.5 / PM10</text>
+<text x="220" y="710" font-size="13" text-anchor="middle" fill="#546E7A">Passive mode, polled every 5 s</text>
+<text x="220" y="730" font-size="13" text-anchor="middle" fill="#546E7A">9600 baud 8N1 · 5 V supply, 3.3 V logic</text>
+
+<path d="M374,542 L470,542 L470,470 L560,470" fill="none" stroke="#1565C0" stroke-width="3.5" marker-end="url(#arB)"/>
+<text x="382" y="534" font-size="12.5" font-weight="600" fill="#1565C0">I²C-A  GPIO6 SDA / GPIO7 SCL</text>
+
+<path d="M374,690 L470,690 L470,620 L560,620" fill="none" stroke="#6A1B9A" stroke-width="3.5" marker-end="url(#arP)"/>
+<text x="382" y="682" font-size="12.5" font-weight="600" fill="#6A1B9A">UART1  GPIO20 RX / GPIO21 TX</text>
+
+<!-- 5V to PMS -->
+<path d="M1012,716 L1012,782 L220,782 L220,740" fill="none" stroke="#D32F2F" stroke-width="3.5" marker-end="url(#arR)"/>
+
+<!-- 3V3 down-left to MAX -->
+<path d="M584,294 L500,294 L500,400 L220,400" fill="none" stroke="#EF6C00" stroke-width="0" />
+<path d="M584,294 L524,294 L524,470 L524,470" fill="none" stroke="#EF6C00" stroke-width="0"/>
+
+<!-- ============ OUTPUTS (right of MCU) ============ -->
+<g stroke="#263238" stroke-width="2.2" fill="#FFFFFF">
+  <rect x="1060" y="220" width="300" height="84" rx="7"/>
+  <rect x="1060" y="360" width="300" height="84" rx="7"/>
+</g>
+<text x="1210" y="248" font-size="15.5" font-weight="700" text-anchor="middle" fill="#111">SSD1306 OLED 0.96&quot;</text>
+<text x="1210" y="270" font-size="13" text-anchor="middle" fill="#546E7A">128 × 64 · addr 0x3C</text>
+<text x="1210" y="290" font-size="13" text-anchor="middle" fill="#546E7A">BPM / SpO₂ / PM / BLE state</text>
+
+<text x="1210" y="388" font-size="15.5" font-weight="700" text-anchor="middle" fill="#111">BLE GATT server</text>
+<text x="1210" y="410" font-size="13" text-anchor="middle" fill="#546E7A">&quot;VitalMonitor&quot; · service a1b2c3d0-0001-…</text>
+<text x="1210" y="430" font-size="13" text-anchor="middle" fill="#546E7A">6 characteristics (see table)</text>
+
+<path d="M940,262 L1060,262" fill="none" stroke="#1565C0" stroke-width="3.5" marker-end="url(#arB)"/>
+<text x="948" y="254" font-size="12.5" font-weight="600" fill="#1565C0">I²C-B  GPIO8 SDA / GPIO9 SCL (software)</text>
+
+<path d="M940,402 L1060,402" fill="none" stroke="#37474F" stroke-width="3.5" marker-end="url(#ar)"/>
+
+<!-- client app -->
+<rect x="1060" y="500" width="300" height="110" rx="7" fill="#F1F8F6" stroke="#00796B" stroke-width="2.4"/>
+<text x="1210" y="528" font-size="15.5" font-weight="700" text-anchor="middle" fill="#004D40">vitalmonitor.html</text>
+<text x="1210" y="550" font-size="13" text-anchor="middle" fill="#546E7A">Web Bluetooth client (Chrome/Edge)</text>
+<text x="1210" y="570" font-size="13" text-anchor="middle" fill="#546E7A">Live cards · profile · history sync</text>
+<text x="1210" y="590" font-size="13" text-anchor="middle" fill="#546E7A">Sends TIME:&lt;unix&gt; on every connect</text>
+
+<path d="M1210,444 L1210,500" fill="none" stroke="#00796B" stroke-width="3.5" stroke-dasharray="9 6" marker-end="url(#arG)"/>
+<text x="1222" y="478" font-size="12.5" font-weight="600" fill="#00796B">BLE 2.4 GHz</text>
+
+<rect x="1060" y="666" width="300" height="72" rx="7" fill="#FFFFFF" stroke="#263238" stroke-width="2.2"/>
+<text x="1210" y="694" font-size="15" font-weight="700" text-anchor="middle" fill="#111">PDF history report</text>
+<text x="1210" y="716" font-size="13" text-anchor="middle" fill="#546E7A">Trend chart + full measurement table</text>
+<path d="M1210,610 L1210,666" fill="none" stroke="#37474F" stroke-width="3.5" marker-end="url(#ar)"/>
+
+<!-- USB -->
+<rect x="640" y="828" width="220" height="56" rx="7" fill="#FFFFFF" stroke="#263238" stroke-width="2.2"/>
+<text x="750" y="852" font-size="14" font-weight="600" text-anchor="middle" fill="#111">USB-C (native, GPIO18/19)</text>
+<text x="750" y="872" font-size="12.5" text-anchor="middle" fill="#546E7A">firmware flash + serial debug</text>
+<path d="M750,828 L750,760" fill="none" stroke="#37474F" stroke-width="3.5" marker-end="url(#ar)"/>
+
+<text x="40" y="922" font-size="12.5" fill="#B71C1C" font-weight="600">Note: breathing rate is NOT measured from the PPG waveform — it is arithmetically derived from heart rate and SpO₂ (firmware line 51). Treat it as an indicative figure only.</text>
+<text x="40" y="944" font-size="12.5" fill="#546E7A">Note: the MAX30102 and the OLED sit on two separate I²C buses (hardware I²C on GPIO6/7, bit-banged U8g2 I²C on GPIO8/9) — they are not a shared bus.</text>
+</svg>

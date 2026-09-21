@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VitalMonitor</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root{
+    --bg: #06090b;
+    --panel: #0d1317;
+    --panel-2: #10181d;
+    --line: #1c2a30;
+    --text: #e6f1f4;
+    --text-dim: #7f97a0;
+    --accent: #00b4d8;
+    --accent-dim: #0a4a5c;
+    --good: #33d17a;
+    --warn: #f2b705;
+    --bad: #ef4444;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Roboto Mono", monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+  }
+  *{ box-sizing: border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0; background: var(--bg); color: var(--text);
+    font-family: var(--sans); -webkit-font-smoothing: antialiased;
+  }
+  button{ font-family: var(--sans); cursor:pointer; }
+  input, select{ font-family: var(--sans); }
+
+  #topbar{
+    display:flex; align-items:center; gap:14px;
+    padding: 14px 20px; border-bottom: 1px solid var(--line);
+    background: linear-gradient(180deg, #0a1013, #070b0d);
+    position: sticky; top:0; z-index: 20;
+  }
+  .brand{ font-weight: 700; letter-spacing: 0.2px; font-size: 17px; }
+  .brand::before{
+    content:""; display:inline-block; width:9px; height:9px; border-radius:50%;
+    background: var(--accent); margin-right:9px; box-shadow: 0 0 8px var(--accent);
+  }
+  #connStatus{
+    margin-left: 4px; padding: 5px 12px; border-radius: 100px;
+    font-size: 13px; border: 1px solid var(--line); color: var(--text-dim);
+  }
+  #connStatus.st-connected{ color: var(--good); border-color: rgba(51,209,122,0.35); background: rgba(51,209,122,0.08); }
+  #connStatus.st-connecting{ color: var(--warn); border-color: rgba(242,183,5,0.35); background: rgba(242,183,5,0.08); }
+  #connStatus.st-disconnected{ color: var(--bad); border-color: rgba(239,68,68,0.35); background: rgba(239,68,68,0.08); }
+
+  #topbar .spacer{ flex:1; }
+  #connectBtn{
+    background: var(--accent); color:#00232c; border:none; font-weight:600;
+    padding: 9px 16px; border-radius: 8px; font-size: 14px;
+  }
+  #connectBtn:disabled{ opacity:0.5; cursor:default; }
+  #connectBtn.secondary{ background: transparent; color: var(--text); border: 1px solid var(--line); }
+
+  #reconnectBanner{
+    background: rgba(242,183,5,0.1); color: var(--warn); border-bottom: 1px solid rgba(242,183,5,0.3);
+    padding: 10px 20px; font-size: 14px; display:flex; align-items:center; gap:10px;
+  }
+  #reconnectBanner .dot{
+    width:8px; height:8px; border-radius:50%; background: var(--warn);
+    animation: pulse 1.1s ease-in-out infinite;
+  }
+  @keyframes pulse{ 0%,100%{ opacity:1; } 50%{ opacity:0.25; } }
+
+  #tabs{ display:flex; gap:4px; padding: 10px 20px 0; border-bottom: 1px solid var(--line); }
+  .tab{
+    background: none; border: none; color: var(--text-dim); font-size: 14px;
+    padding: 10px 14px; border-bottom: 2px solid transparent; margin-bottom:-1px;
+  }
+  .tab.active{ color: var(--text); border-bottom-color: var(--accent); }
+
+  main{ max-width: 880px; margin: 0 auto; padding: 28px 20px 60px; }
+  .hidden{ display:none !important; }
+
+  #connectPanel{ text-align:center; padding: 90px 20px; }
+  #connectPanel h1{ font-size: 26px; margin: 0 0 10px; }
+  #connectPanel p{ color: var(--text-dim); max-width: 480px; margin: 0 auto 28px; line-height:1.55; font-size:14.5px; }
+  #connectPanel .hint{ margin-top:22px; font-size: 12.5px; color: var(--text-dim); }
+  #connectBigBtn{
+    background: var(--accent); color:#00232c; border:none; font-weight:700;
+    padding: 14px 26px; border-radius: 10px; font-size: 15px;
+  }
+  #connectBigBtn:disabled{ opacity:0.5; cursor:default; }
+
+  .view{ display:flex; flex-direction:column; gap:22px; }
+
+  .cards{ display:grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap:14px; }
+  .card{
+    background: var(--panel); border:1px solid var(--line); border-radius: 14px;
+    padding: 18px 16px; text-align:center;
+  }
+  .card .label{ font-size: 12.5px; color: var(--text-dim); margin-bottom: 8px; }
+  .card .value{ font-family: var(--mono); font-size: 32px; font-weight: 600; color: var(--accent); line-height:1; }
+  .card .unit{ font-size: 13px; color: var(--text-dim); margin-left: 3px; }
+  .card.finger-off .value{ color: var(--text-dim); }
+
+  .measure-box{
+    background: var(--panel); border:1px solid var(--line); border-radius: 14px; padding: 18px;
+    display:flex; flex-direction:column; gap:12px;
+  }
+  .measure-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  #measureBtn{
+    background: var(--accent); color:#00232c; border:none; font-weight:700;
+    padding: 12px 18px; border-radius: 10px; font-size: 14.5px; width:100%;
+  }
+  #measureBtn:disabled{ background: var(--panel-2); color: var(--text-dim); }
+  #measureBtn.stop{ background: var(--bad); color: white; }
+  .progress-track{ height: 8px; border-radius: 100px; background: var(--panel-2); overflow:hidden; }
+  .progress-fill{ height:100%; background: var(--accent); width:0%; transition: width 0.4s linear; }
+  .countdown{ font-family: var(--mono); font-size: 13px; color: var(--text-dim); text-align:right; }
+
+  h2{ font-size: 15px; text-transform: none; color: var(--text); margin: 0; }
+  .section-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .btn-ghost{
+    background: transparent; border: 1px solid var(--line); color: var(--text);
+    padding: 8px 13px; border-radius: 8px; font-size: 13px;
+  }
+  .btn-ghost:disabled{ opacity:0.4; cursor:default; }
+
+  table{ width:100%; border-collapse: collapse; font-size: 13.5px; }
+  thead th{ text-align:left; color: var(--text-dim); font-weight:500; font-size:12px; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+  tbody td{ padding: 9px 8px; border-bottom: 1px solid var(--line); font-family: var(--mono); }
+  tbody tr:last-child td{ border-bottom:none; }
+  .empty-note{ color: var(--text-dim); font-size: 13.5px; padding: 20px 4px; text-align:center; }
+
+  .form-grid{ display:flex; flex-direction:column; gap:14px; max-width: 360px; }
+  .field label{ display:block; font-size: 12.5px; color: var(--text-dim); margin-bottom:6px; }
+  .field input, .field select{
+    width:100%; background: var(--panel-2); border: 1px solid var(--line); color: var(--text);
+    padding: 10px 12px; border-radius: 8px; font-size: 14px;
+  }
+  #saveProfileBtn{
+    background: var(--accent); color:#00232c; border:none; font-weight:700;
+    padding: 11px 16px; border-radius: 8px; font-size: 14px; align-self:flex-start;
+  }
+
+  .modal-overlay{
+    position: fixed; inset:0; background: rgba(0,0,0,0.6); display:flex;
+    align-items:center; justify-content:center; z-index: 50; padding:20px;
+  }
+  .modal{
+    background: var(--panel); border: 1px solid var(--line); border-radius: 16px;
+    padding: 24px; max-width: 380px; width:100%;
+  }
+  .modal h3{ margin:0 0 4px; font-size:16px; }
+  .modal .sub{ color: var(--text-dim); font-size: 13px; margin-bottom: 16px; }
+  .modal-values{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom: 18px; }
+  .modal-values .mv{ background: var(--panel-2); border-radius:10px; padding:10px 12px; }
+  .modal-values .mv .l{ font-size:11.5px; color:var(--text-dim); }
+  .modal-values .mv .v{ font-family: var(--mono); font-size:17px; color: var(--accent); }
+  .modal-actions{ display:flex; gap:10px; justify-content:flex-end; }
+  .btn-primary{ background: var(--accent); color:#00232c; border:none; font-weight:700; padding: 9px 15px; border-radius: 8px; font-size:13.5px; }
+  .btn-secondary{ background: transparent; border:1px solid var(--line); color: var(--text); padding: 9px 15px; border-radius: 8px; font-size:13.5px; }
+
+  .sync-progress-track{ height:10px; border-radius:100px; background: var(--panel-2); overflow:hidden; margin: 6px 0 4px; }
+  .sync-progress-fill{ height:100%; background: var(--accent); width:0%; transition: width 0.2s linear; }
+  .sync-count{ font-family: var(--mono); font-size:13px; color: var(--text-dim); text-align:right; }
+  .sync-error{ color: var(--bad); font-size: 13.5px; margin: 10px 0; display:none; }
+
+  #toast{
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--panel); border: 1px solid var(--line); color: var(--text);
+    padding: 11px 18px; border-radius: 10px; font-size: 13.5px; z-index: 60;
+  }
+  .unsupported{
+    max-width: 480px; margin: 90px auto; text-align:center; color: var(--text-dim);
+    line-height: 1.6; font-size: 14.5px;
+  }
+
+  /* ---- mobile (Android Chrome and small screens) ---- */
+  @media (max-width: 620px){
+    #topbar{ flex-wrap: wrap; padding: 12px 14px; gap:10px; }
+    .brand{ font-size:15px; }
+    #connStatus{ order:3; margin-left:0; }
+    #connectBtn{ order:2; margin-left:auto; padding: 10px 14px; }
+    #tabs{ padding: 8px 10px 0; overflow-x:auto; -webkit-overflow-scrolling: touch; }
+    .tab{ padding: 10px 12px; white-space:nowrap; }
+    main{ padding: 18px 14px 50px; }
+    #connectPanel{ padding: 50px 10px; }
+    #connectPanel h1{ font-size: 21px; }
+    #connectBigBtn{ width:100%; padding: 15px 20px; }
+    .cards{ grid-template-columns: repeat(2, 1fr); }
+    .card .value{ font-size: 26px; }
+    table{ font-size: 12.5px; }
+    thead th, tbody td{ padding: 7px 5px; }
+    .modal{ padding: 18px; }
+    .modal-values{ grid-template-columns: 1fr 1fr; }
+    .section-head{ flex-wrap: wrap; gap:8px; }
+    button, .field input, .field select{ min-height: 40px; } /* comfortable touch targets */
+  }
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div class="brand">VitalMonitor</div>
+  <div id="connStatus" class="st-idle">Not connected</div>
+  <div class="spacer"></div>
+  <button id="connectBtn">Connect device</button>
+</div>
+
+<div id="reconnectBanner" class="hidden">
+  <div class="dot"></div>
+  <div>Disconnected — reconnecting…</div>
+</div>
+
+<nav id="tabs" class="hidden">
+  <button class="tab active" data-tab="dashboard">Dashboard</button>
+  <button class="tab" data-tab="history">History</button>
+  <button class="tab" data-tab="profile">Profile</button>
+</nav>
+
+<main>
+
+  <section id="connectPanel">
+    <h1>Connect your VitalMonitor</h1>
+    <p>Scan brings up your browser's device picker, filtered so only a VitalMonitor
+       device can appear — nothing else on your bench will show up or get in the way.</p>
+    <button id="connectBigBtn">Scan for VitalMonitor</button>
+    <div class="hint" id="supportHint"></div>
+  </section>
+
+  <section id="view-dashboard" class="view hidden">
+    <div class="cards" id="liveCards">
+      <div class="card" id="card-bpm">
+        <div class="label">Heart rate</div>
+        <div class="value"><span id="val-bpm">--</span><span class="unit">bpm</span></div>
+      </div>
+      <div class="card" id="card-spo2">
+        <div class="label">SpO2</div>
+        <div class="value"><span id="val-spo2">--</span><span class="unit">%</span></div>
+      </div>
+      <div class="card" id="card-breathing">
+        <div class="label">Breathing rate</div>
+        <div class="value"><span id="val-breathing">--</span><span class="unit">br/min</span></div>
+      </div>
+    </div>
+
+    <div class="measure-box">
+      <div class="measure-row">
+        <button id="measureBtn">Start measurement (~30s)</button>
+      </div>
+      <div id="measureProgressWrap" class="hidden">
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="countdown"><span id="countdownVal">30</span>s remaining</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="view-history" class="view hidden">
+    <div class="section-head">
+      <h2>Past measurements</h2>
+      <button class="btn-ghost" id="syncBtn">Sync full history</button>
+    </div>
+    <table>
+      <thead>
+        <tr><th>Measurement</th><th>Date &amp; time</th><th>BPM</th><th>SpO2</th><th>PM1.0</th><th>PM2.5</th><th>PM10</th></tr>
+      </thead>
+      <tbody id="historyBody"></tbody>
+    </table>
+    <div id="historyEmpty" class="empty-note hidden">No measurements yet.</div>
+    <div class="section-head">
+      <div></div>
+      <button class="btn-ghost" id="loadMoreBtn">Load more</button>
+    </div>
+    <div class="section-head hidden" id="csvRow">
+      <div style="color:var(--text-dim); font-size:13px;" id="syncedNote"></div>
+      <button class="btn-ghost" id="downloadPdfBtn">Download full history (PDF)</button>
+    </div>
+  </section>
+
+  <section id="view-profile" class="view hidden">
+    <h2>Profile</h2>
+    <div class="form-grid">
+      <div class="field">
+        <label for="profName">Name</label>
+        <input id="profName" type="text" placeholder="Jane Doe">
+      </div>
+      <div class="field">
+        <label for="profAge">Age</label>
+        <input id="profAge" type="number" min="0" max="130" placeholder="29">
+      </div>
+      <div class="field">
+        <label for="profGender">Gender</label>
+        <select id="profGender">
+          <option>Male</option>
+          <option>Female</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <button id="saveProfileBtn">Save profile</button>
+    </div>
+  </section>
+
+</main>
+
+<div id="summaryOverlay" class="modal-overlay hidden">
+  <div class="modal">
+    <h3>Measurement complete</h3>
+    <div class="sub">Averages over the ~30 second window</div>
+    <div class="modal-values">
+      <div class="mv"><div class="l">BPM</div><div class="v" id="sum-bpm">--</div></div>
+      <div class="mv"><div class="l">SpO2</div><div class="v" id="sum-spo2">--</div></div>
+      <div class="mv"><div class="l">Breathing</div><div class="v" id="sum-breathing">--</div></div>
+      <div class="mv"><div class="l">PM1.0</div><div class="v" id="sum-pm1">--</div></div>
+      <div class="mv"><div class="l">PM2.5</div><div class="v" id="sum-pm25">--</div></div>
+      <div class="mv"><div class="l">PM10</div><div class="v" id="sum-pm10">--</div></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" id="summaryPdfBtn">Download PDF</button>
+      <button class="btn-primary" id="summaryCloseBtn">Done</button>
+    </div>
+  </div>
+</div>
+
+<div id="syncOverlay" class="modal-overlay hidden">
+  <div class="modal">
+    <h3>Syncing full history</h3>
+    <div class="sub" id="syncSub">Requesting record count…</div>
+    <div class="sync-progress-track"><div class="sync-progress-fill" id="syncFill"></div></div>
+    <div class="sync-count" id="syncCount">0 / 0</div>
+    <div class="sync-error" id="syncError"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" id="syncCancelBtn">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="hidden"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---- device identity (must match firmware exactly) ----
+  const SERVICE_UUID = 'a1b2c3d0-0001-1000-8000-00805f9b34fb';
+  const CHAR = {
+    vitals:  'a1b2c3d0-0002-1000-8000-00805f9b34fb',
+    control: 'a1b2c3d0-0003-1000-8000-00805f9b34fb',
+    status:  'a1b2c3d0-0004-1000-8000-00805f9b34fb',
+    history: 'a1b2c3d0-0005-1000-8000-00805f9b34fb',
+    profile: 'a1b2c3d0-0006-1000-8000-00805f9b34fb',
+    sync:    'a1b2c3d0-0007-1000-8000-00805f9b34fb',
+  };
+
+  const enc = new TextEncoder();
+  const dec = new TextDecoder();
+
+  let device = null, server = null, gattService = null;
+  const chars = {};
+  let intentionalDisconnect = false;
+  let reconnectTimer = null;
+
+  // ---- serialize every GATT read/write so calls never overlap.
+  // Chrome only allows ONE outstanding GATT operation per device at a
+  // time; running them concurrently is the #1 cause of flaky
+  // "GATT operation already in progress" errors and phantom disconnects. ----
+  let opQueue = Promise.resolve();
+  function enqueue(task) {
+    const run = () => task();
+    opQueue = opQueue.then(run, run);
+    return opQueue;
+  }
+  function writeStr(char, str) {
+    return enqueue(() => char.writeValue(enc.encode(str)));
+  }
+  function readJSON(char) {
+    return enqueue(async () => {
+      const val = await char.readValue();
+      return JSON.parse(dec.decode(val));
+    });
+  }
+
+  // ---------- time sync + formatting ----------
+  // The device stores each record's ts as unix seconds (UTC). Values below
+  // this cutoff are old records saved before clock sync existed (or saved
+  // while the clock was never set) — they carry no real date.
+  const MIN_VALID_EPOCH = 1577836800; // 1 Jan 2020
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const pad2 = (n) => String(n).padStart(2, '0');
+
+  // "21 Sep 2026, 14:32:05" in the phone/laptop's local timezone.
+  // Built by hand (24-hour, ASCII only) so it prints cleanly in the PDF.
+  function fmtTs(ts) {
+    const t = Number(ts);
+    if (!t || t < MIN_VALID_EPOCH) return 'Time not set';
+    const d = new Date(t * 1000);
+    return d.getDate() + ' ' + MONTHS[d.getMonth()] + ' ' + d.getFullYear() + ', ' +
+           pad2(d.getHours()) + ':' + pad2(d.getMinutes()) + ':' + pad2(d.getSeconds());
+  }
+
+  // ---------- UI helpers ----------
+  const $ = (id) => document.getElementById(id);
+  function showToast(msg) {
+    const t = $('toast');
+    t.textContent = msg;
+    t.classList.remove('hidden');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => t.classList.add('hidden'), 2600);
+  }
+  function setConnStatus(state) {
+    const el = $('connStatus');
+    el.className = 'st-' + state;
+    el.textContent = {
+      idle: 'Not connected',
+      scanning: 'Scanning…',
+      connecting: 'Connecting…',
+      connected: 'Connected',
+      disconnected: 'Disconnected'
+    }[state] || state;
+  }
+  function setConnectedUI(isConnected) {
+    $('connectPanel').classList.toggle('hidden', isConnected);
+    $('tabs').classList.toggle('hidden', !isConnected);
+    document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+    if (isConnected) {
+      const activeTab = document.querySelector('.tab.active')?.dataset.tab || 'dashboard';
+      $('view-' + activeTab).classList.remove('hidden');
+    }
+    $('connectBtn').textContent = isConnected ? 'Disconnect' : 'Connect device';
+  }
+
+  // ---------- tabs ----------
+  document.querySelectorAll('.tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+      $('view-' + btn.dataset.tab).classList.remove('hidden');
+    });
+  });
+
+  // ---------- Web Bluetooth support check ----------
+  const isSecure = window.isSecureContext;
+  const isAndroid = /Android/i.test(navigator.userAgent);
+
+  if (!navigator.bluetooth || !isSecure) {
+    let msg = 'Web Bluetooth isn\'t available here.<br>';
+    if (!navigator.bluetooth) {
+      msg += 'Use a recent Chrome or Edge — Safari, Firefox, and in-app browsers ' +
+             '(e.g. opening this from WhatsApp/Instagram) don\'t support it.';
+    } else {
+      msg += 'This page needs to load over HTTPS or from localhost. Serving it ' +
+             'from a plain http:// address (other than localhost) blocks Web ' +
+             'Bluetooth for security reasons.';
+    }
+    document.body.innerHTML = '<div class="unsupported">' + msg + '</div>';
+    return;
+  }
+
+  if (isAndroid) {
+    // Android's BLE stack requires system Location Services to be turned on
+    // for Chrome to scan at all — this is an OS-level requirement, not
+    // something this page can enable on its own.
+    $('supportHint').textContent =
+      'On Android: make sure Location is turned on in system settings — ' +
+      'Chrome needs it to scan for Bluetooth devices, even though this page ' +
+      'doesn\'t use your location for anything else.';
+  }
+
+  // ---------- connect / disconnect ----------
+  async function connect() {
+    try {
+      setConnStatus('scanning');
+      $('connectBigBtn').disabled = true;
+      $('connectBtn').disabled = true;
+
+      // The `filters` array is what keeps the browser's picker to ONLY
+      // devices advertising this exact service UUID — nothing else on
+      // the bench can appear in the list or be selected by mistake.
+      device = await navigator.bluetooth.requestDevice({
+        filters: [{ services: [SERVICE_UUID] }],
+        optionalServices: [SERVICE_UUID]
+      });
+
+      intentionalDisconnect = false;
+      device.addEventListener('gattserverdisconnected', onDisconnected);
+
+      await gattConnect();
+    } catch (err) {
+      if (err.name !== 'NotFoundError') {
+        showToast('Connection failed: ' + err.message);
+      }
+      setConnStatus('idle');
+    } finally {
+      $('connectBigBtn').disabled = false;
+      $('connectBtn').disabled = false;
+    }
+  }
+
+  async function gattConnect() {
+    setConnStatus('connecting');
+    server = await device.gatt.connect();
+    gattService = await server.getPrimaryService(SERVICE_UUID);
+
+    chars.vitals  = await gattService.getCharacteristic(CHAR.vitals);
+    chars.control = await gattService.getCharacteristic(CHAR.control);
+    chars.status  = await gattService.getCharacteristic(CHAR.status);
+    chars.history = await gattService.getCharacteristic(CHAR.history);
+    chars.profile = await gattService.getCharacteristic(CHAR.profile);
+    chars.sync    = await gattService.getCharacteristic(CHAR.sync);
+
+    await chars.vitals.startNotifications();
+    chars.vitals.addEventListener('characteristicvaluechanged', onVitalsNotify);
+
+    await chars.status.startNotifications();
+    chars.status.addEventListener('characteristicvaluechanged', onStatusNotify);
+
+    await chars.sync.startNotifications();
+    chars.sync.addEventListener('characteristicvaluechanged', onSyncNotify);
+
+    setConnStatus('connected');
+    setConnectedUI(true);
+    $('reconnectBanner').classList.add('hidden');
+    if (reconnectTimer) { clearInterval(reconnectTimer); reconnectTimer = null; }
+
+    // set the device clock from this phone/laptop before anything else
+    try {
+      await writeStr(chars.control, 'TIME:' + Math.floor(Date.now() / 1000));
+    } catch (e) {
+      showToast('Could not sync time to device: ' + e.message);
+    }
+
+    resetHistoryState();
+    loadHistoryPage();
+    loadProfile();
+  }
+
+  function onDisconnected() {
+    setConnStatus('disconnected');
+    if (syncActive) failSync('Device disconnected during sync.');
+    if (intentionalDisconnect) {
+      setConnectedUI(false);
+      setConnStatus('idle');
+      return;
+    }
+    $('reconnectBanner').classList.remove('hidden');
+    attemptReconnect();
+  }
+
+  function attemptReconnect() {
+    if (reconnectTimer) return;
+    reconnectTimer = setInterval(async () => {
+      if (!device) return;
+      try {
+        await gattConnect();
+      } catch (e) {
+        // device still out of range / not ready — keep trying quietly
+      }
+    }, 2000);
+  }
+
+  $('connectBigBtn').addEventListener('click', connect);
+  $('connectBtn').addEventListener('click', () => {
+    if (device && device.gatt.connected) {
+      intentionalDisconnect = true;
+      if (reconnectTimer) { clearInterval(reconnectTimer); reconnectTimer = null; }
+      device.gatt.disconnect();
+      setConnectedUI(false);
+      setConnStatus('idle');
+    } else {
+      connect();
+    }
+  });
+
+  // ---------- Dashboard: vitals ----------
+  let measuring = false;
+  let lastMeasurement = null; // most recent completed measurement, for the single-report PDF
+  // The firmware keeps notifying done:true every ~1s for as long as it stays
+  // connected, until the next START resets it — so without this flag the
+  // summary popup would reopen on every one of those repeated notifications,
+  // even after the user closes it.
+  let measurementResultShown = false;
+
+  function onVitalsNotify(e) {
+    let d;
+    try { d = JSON.parse(dec.decode(e.target.value)); } catch { return; }
+    if (measuring) return; // during a measurement the 5-card view owns the display
+    $('val-bpm').textContent = d.bpm > 0 ? d.bpm : '--';
+    $('val-spo2').textContent = d.spo2 > 0 ? d.spo2 : '--';
+    $('val-breathing').textContent = d.breathing > 0 ? d.breathing : '--';
+    $('card-bpm').classList.toggle('finger-off', !d.finger);
+    $('card-spo2').classList.toggle('finger-off', !d.finger);
+    $('card-breathing').classList.toggle('finger-off', !d.finger);
+  }
+
+  function renderMeasuringCards() {
+    $('liveCards').innerHTML = `
+      <div class="card"><div class="label">BPM</div><div class="value"><span id="live-bpm">--</span></div></div>
+      <div class="card"><div class="label">SpO2</div><div class="value"><span id="live-spo2">--</span><span class="unit">%</span></div></div>
+      <div class="card"><div class="label">Breathing</div><div class="value"><span id="live-breathing">--</span><span class="unit">br/min</span></div></div>
+      <div class="card"><div class="label">PM1.0</div><div class="value"><span id="live-pm1">--</span></div></div>
+      <div class="card"><div class="label">PM2.5</div><div class="value"><span id="live-pm25">--</span></div></div>
+      <div class="card"><div class="label">PM10</div><div class="value"><span id="live-pm10">--</span></div></div>
+    `;
+  }
+  function renderIdleCards() {
+    $('liveCards').innerHTML = `
+      <div class="card" id="card-bpm"><div class="label">Heart rate</div><div class="value"><span id="val-bpm">--</span><span class="unit">bpm</span></div></div>
+      <div class="card" id="card-spo2"><div class="label">SpO2</div><div class="value"><span id="val-spo2">--</span><span class="unit">%</span></div></div>
+      <div class="card" id="card-breathing"><div class="label">Breathing rate</div><div class="value"><span id="val-breathing">--</span><span class="unit">br/min</span></div></div>
+    `;
+  }
+
+  $('measureBtn').addEventListener('click', async () => {
+    if (measuring) {
+      await writeStr(chars.control, 'STOP');
+      return;
+    }
+    try {
+      await writeStr(chars.control, 'START');
+    } catch (e) {
+      showToast('Could not start measurement: ' + e.message);
+    }
+  });
+
+  function onStatusNotify(e) {
+    let d;
+    try { d = JSON.parse(dec.decode(e.target.value)); } catch { return; }
+
+    if (d.active && !measuring) {
+      // measurement just started
+      measuring = true;
+      measurementResultShown = false; // new measurement — allow its result popup to show once
+      renderMeasuringCards();
+      $('measureBtn').textContent = 'Stop measurement';
+      $('measureBtn').classList.add('stop');
+      $('measureProgressWrap').classList.remove('hidden');
+    }
+
+    if (d.active) {
+      $('live-bpm').textContent = d.liveBPM ?? '--';
+      $('live-spo2').textContent = d.liveSpo2 ?? '--';
+      $('live-breathing').textContent = d.liveBreathing ?? '--';
+      $('live-pm1').textContent = d.livePM1 ?? '--';
+      $('live-pm25').textContent = d.livePM25 ?? '--';
+      $('live-pm10').textContent = d.livePM10 ?? '--';
+      const pct = Math.max(0, Math.min(100, 100 - (d.remaining / 30 * 100)));
+      $('progressFill').style.width = pct + '%';
+      $('countdownVal').textContent = d.remaining;
+    }
+
+    if (!d.active && measuring && !d.done) {
+      // stopped/aborted without completing
+      endMeasuringUI();
+    }
+
+    if (d.done && !measurementResultShown) {
+      measurementResultShown = true; // suppress the repeat notifications that follow
+      $('sum-bpm').textContent = d.avgBPM ?? '--';
+      $('sum-spo2').textContent = (d.avgSpo2 !== undefined) ? d.avgSpo2 : '--';
+      $('sum-breathing').textContent = (d.avgBreathing !== undefined) ? d.avgBreathing : '--';
+      $('sum-pm1').textContent = (d.avgPM1 !== undefined) ? d.avgPM1 : '--';
+      $('sum-pm25').textContent = (d.avgPM25 !== undefined) ? d.avgPM25 : '--';
+      $('sum-pm10').textContent = (d.avgPM10 !== undefined) ? d.avgPM10 : '--';
+      lastMeasurement = {
+        ts: Date.now(),
+        bpm: d.avgBPM ?? 0,
+        spo2: d.avgSpo2 ?? 0,
+        breathing: d.avgBreathing ?? 0,
+        pm1: d.avgPM1 ?? 0,
+        pm25: d.avgPM25 ?? 0,
+        pm10: d.avgPM10 ?? 0
+      };
+      $('summaryOverlay').classList.remove('hidden');
+      endMeasuringUI();
+      resetHistoryState();
+      loadHistoryPage();
+    }
+  }
+
+  function endMeasuringUI() {
+    measuring = false;
+    renderIdleCards();
+    $('measureBtn').textContent = 'Start measurement (~30s)';
+    $('measureBtn').classList.remove('stop');
+    $('measureProgressWrap').classList.add('hidden');
+    $('progressFill').style.width = '0%';
+  }
+
+  $('summaryCloseBtn').addEventListener('click', () => {
+    $('summaryOverlay').classList.add('hidden');
+  });
+
+  $('summaryPdfBtn').addEventListener('click', () => {
+    if (!lastMeasurement) return;
+    generateSingleReportPdf(lastMeasurement);
+  });
+
+  // ---------- History (paginated) ----------
+  let historyPage = 0;
+  let historyEnded = false;
+  let historyRowCount = 0;
+
+  function resetHistoryState() {
+    historyPage = 0;
+    historyEnded = false;
+    historyRowCount = 0;
+    $('historyBody').innerHTML = '';
+    $('historyEmpty').classList.add('hidden');
+  }
+
+  async function loadHistoryPage() {
+    if (historyEnded) return;
+    $('loadMoreBtn').disabled = true;
+    try {
+      await writeStr(chars.history, 'PAGE:' + historyPage);
+      const data = await readJSON(chars.history);
+      const records = data.records || [];
+      if (records.length === 0) {
+        historyEnded = true;
+        $('loadMoreBtn').textContent = 'No more records';
+        $('loadMoreBtn').disabled = true;
+        if (historyRowCount === 0) $('historyEmpty').classList.remove('hidden');
+        return;
+      }
+      const tbody = $('historyBody');
+      records.forEach(() => { historyRowCount++; });
+      let n = historyRowCount - records.length + 1;
+      for (const r of records) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>Measurement ${n}</td><td>${fmtTs(r.ts)}</td><td>${r.bpm}</td><td>${r.spo2}</td><td>${r.pm1}</td><td>${r.pm25}</td><td>${r.pm10}</td>`;
+        tbody.appendChild(tr);
+        n++;
+      }
+      historyPage++;
+      $('loadMoreBtn').disabled = false;
+    } catch (e) {
+      showToast('Could not load history: ' + e.message);
+      $('loadMoreBtn').disabled = false;
+    }
+  }
+  $('loadMoreBtn').addEventListener('click', loadHistoryPage);
+
+  // ---------- Full history sync (chunked, ack'd) ----------
+  let syncRecords = [];
+  let syncTotal = 0;
+  let syncActive = false;
+  let syncWatchdog = null;
+
+  function armSyncWatchdog() {
+    clearTimeout(syncWatchdog);
+    syncWatchdog = setTimeout(() => failSync('No response from the device (timed out).'), 5000);
+  }
+
+  function showSyncModal() {
+    $('syncOverlay').classList.remove('hidden');
+    $('syncError').style.display = 'none';
+    $('syncSub').textContent = 'Requesting record count…';
+    $('syncFill').style.width = '0%';
+    $('syncCount').textContent = '0 / 0';
+  }
+  function hideSyncModal() { $('syncOverlay').classList.add('hidden'); }
+
+  function updateSyncProgress(got, total) {
+    $('syncSub').textContent = 'Receiving records…';
+    $('syncCount').textContent = got + ' / ' + total;
+    $('syncFill').style.width = (total > 0 ? (got / total * 100) : 0) + '%';
+  }
+
+  async function startFullSync() {
+    syncRecords = [];
+    syncTotal = 0;
+    syncActive = true;
+    showSyncModal();
+    try {
+      await writeStr(chars.sync, 'SYNC:START');
+      armSyncWatchdog();
+    } catch (e) {
+      failSync('Could not start sync: ' + e.message);
+    }
+  }
+
+  function onSyncNotify(e) {
+    let msg;
+    try { msg = JSON.parse(dec.decode(e.target.value)); } catch { return; }
+    if (!syncActive) return;
+
+    if (msg.type === 'header') {
+      syncTotal = msg.total;
+      updateSyncProgress(0, syncTotal);
+      armSyncWatchdog();
+    } else if (msg.type === 'record') {
+      syncRecords[msg.seq] = msg; // overwrite on duplicate/retransmit, per protocol
+      updateSyncProgress(syncRecords.filter(Boolean).length, syncTotal);
+      writeStr(chars.sync, 'ACK:' + msg.seq).catch(() => {});
+      armSyncWatchdog();
+    } else if (msg.type === 'done') {
+      clearTimeout(syncWatchdog);
+      syncActive = false;
+      finishSync();
+    } else if (msg.type === 'error') {
+      failSync('Device reported: ' + (msg.reason || 'unknown error'));
+    }
+  }
+
+  function finishSync() {
+    hideSyncModal();
+    const count = syncRecords.filter(Boolean).length;
+    showToast('Synced ' + count + ' record' + (count === 1 ? '' : 's') + '.');
+    $('csvRow').classList.remove('hidden');
+    $('syncedNote').textContent = count + ' record' + (count === 1 ? '' : 's') + ' ready to export';
+  }
+
+  function failSync(message) {
+    clearTimeout(syncWatchdog);
+    syncActive = false;
+    $('syncError').textContent = message + ' You can retry the sync.';
+    $('syncError').style.display = 'block';
+  }
+
+  $('syncBtn').addEventListener('click', startFullSync);
+  $('syncCancelBtn').addEventListener('click', async () => {
+    clearTimeout(syncWatchdog);
+    syncActive = false;
+    try { await writeStr(chars.sync, 'SYNC:CANCEL'); } catch {}
+    hideSyncModal();
+  });
+
+  // ---------- PDF report generation ----------
+  // Both reports pull patient info straight from the on-screen profile fields
+  // (already loaded from the device), so the profile tab should be filled in
+  // before generating a report.
+  function currentPatientInfo() {
+    return {
+      name: $('profName').value.trim() || '—',
+      age: $('profAge').value || '—',
+      gender: $('profGender').value || '—'
+    };
+  }
+
+  function drawReportHeader(doc, title) {
+    doc.setFontSize(16); doc.setFont(undefined, 'bold'); doc.setTextColor(20);
+    doc.text(title, 14, 18);
+    doc.setFontSize(10); doc.setFont(undefined, 'normal'); doc.setTextColor(120);
+    doc.text('Generated ' + new Date().toLocaleString(), 14, 25);
+    doc.setDrawColor(210); doc.line(14, 29, 196, 29);
+  }
+
+  function drawPatientBlock(doc, startY) {
+    const p = currentPatientInfo();
+    doc.setTextColor(20); doc.setFontSize(11); doc.setFont(undefined, 'bold');
+    doc.text('Patient', 14, startY);
+    doc.setFont(undefined, 'normal'); doc.setFontSize(10);
+    doc.text('Name: ' + p.name, 14, startY + 7);
+    doc.text('Age: ' + p.age, 14, startY + 13);
+    doc.text('Gender: ' + p.gender, 14, startY + 19);
+    return startY + 27;
+  }
+
+  function drawVitalsRows(doc, startY, m, withTime) {
+    const rows = [
+      ...(withTime ? [['Date & time', fmtTs(m.ts)]] : []),
+      ['Heart rate', m.bpm + ' bpm'],
+      ['SpO2', m.spo2 + ' %'],
+      ['PM1.0', m.pm1 + ' \u00b5g/m\u00b3'],
+      ['PM2.5', m.pm25 + ' \u00b5g/m\u00b3'],
+      ['PM10', m.pm10 + ' \u00b5g/m\u00b3']
+    ];
+    doc.setFontSize(10); doc.setFont(undefined, 'normal');
+    let y = startY;
+    rows.forEach(r => { doc.text(r[0], 14, y); doc.text(String(r[1]), 80, y); y += 7; });
+    return y;
+  }
+
+  // records[] are ordered most-recent-first (seq 0 = most recent), matching
+  // the device's HistorySync protocol. This chart wants oldest-to-newest
+  // left to right, so it works off a reversed copy.
+  function drawTrendChartImage(records) {
+    const chrono = records.slice().reverse();
+    const canvas = document.createElement('canvas');
+    canvas.width = 900; canvas.height = 320;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const padL = 50, padR = 20, padT = 24, padB = 30;
+    const w = canvas.width - padL - padR, h = canvas.height - padT - padB;
+    const n = chrono.length;
+
+    const bpmVals = chrono.map(r => r.bpm);
+    const bpmMax = Math.max(120, ...bpmVals);
+    const bpmMin = Math.min(40, ...bpmVals);
+    const spo2Min = 70, spo2Max = 100; // fixed scale — SpO2 only meaningful in this band
+
+    const xAt = i => padL + (n <= 1 ? w / 2 : (i / (n - 1)) * w);
+    const yAtBpm = v => padT + h - ((v - bpmMin) / (bpmMax - bpmMin)) * h;
+    const yAtSpo2 = v => padT + h - ((v - spo2Min) / (spo2Max - spo2Min)) * h;
+
+    ctx.strokeStyle = '#ccc'; ctx.lineWidth = 1;
+    ctx.strokeRect(padL, padT, w, h);
+
+    ctx.strokeStyle = '#e63946'; ctx.lineWidth = 2; ctx.beginPath();
+    bpmVals.forEach((v, i) => { const x = xAt(i), y = yAtBpm(v); i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); });
+    ctx.stroke();
+
+    ctx.strokeStyle = '#1d4ed8'; ctx.lineWidth = 2; ctx.beginPath();
+    chrono.map(r => r.spo2).forEach((v, i) => { const x = xAt(i), y = yAtSpo2(v); i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); });
+    ctx.stroke();
+
+    ctx.font = '13px sans-serif';
+    ctx.fillStyle = '#e63946'; ctx.fillRect(padL, 4, 10, 10);
+    ctx.fillStyle = '#000'; ctx.fillText('Heart rate (bpm)', padL + 16, 13);
+    ctx.fillStyle = '#1d4ed8'; ctx.fillRect(padL + 160, 4, 10, 10);
+    ctx.fillStyle = '#000'; ctx.fillText('SpO2 (%)', padL + 176, 13);
+
+    ctx.fillStyle = '#555'; ctx.font = '11px sans-serif';
+    ctx.fillText('Oldest', padL, canvas.height - 8);
+    ctx.textAlign = 'right';
+    ctx.fillText('Most recent', canvas.width - padR, canvas.height - 8);
+    ctx.textAlign = 'left';
+
+    return canvas.toDataURL('image/png');
+  }
+
+  function generateSingleReportPdf(m) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    drawReportHeader(doc, 'VitalMonitor \u2014 Measurement Report');
+    let y = drawPatientBlock(doc, 38);
+    doc.setFont(undefined, 'bold'); doc.setFontSize(11);
+    doc.text('Measurement \u2014 ' + new Date(m.ts).toLocaleString(), 14, y);
+    drawVitalsRows(doc, y + 8, m);
+    doc.save('vitalmonitor-report-' + Date.now() + '.pdf');
+  }
+
+  function generateHistoryPdf(records) {
+    if (!records.length) { showToast('No synced records to export.'); return; }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    drawReportHeader(doc, 'VitalMonitor \u2014 Full History Report');
+    let y = drawPatientBlock(doc, 38);
+
+    // most recent measurement, shown up top
+    doc.setFont(undefined, 'bold'); doc.setFontSize(11);
+    doc.text('Most recent measurement', 14, y);
+    y = drawVitalsRows(doc, y + 8, records[0], true) + 6;
+
+    // trend plot, right below it
+    doc.setFont(undefined, 'bold'); doc.setFontSize(11);
+    doc.text('Trend \u2014 heart rate & SpO2', 14, y);
+    y += 4;
+    doc.addImage(drawTrendChartImage(records), 'PNG', 14, y, 182, 65);
+    y += 72;
+
+    // full table, oldest to newest
+    const chrono = records.slice().reverse();
+    if (y > 255) { doc.addPage(); y = 20; }
+    doc.setFont(undefined, 'bold'); doc.setFontSize(11);
+    doc.text('All measurements', 14, y);
+    y += 8;
+    const headers = ['#', 'Date & time', 'BPM', 'SpO2 %', 'PM1.0', 'PM2.5', 'PM10'];
+    const colX = [14, 24, 70, 88, 108, 128, 148];
+    doc.setFontSize(9); doc.setFont(undefined, 'bold');
+    headers.forEach((h, i) => doc.text(h, colX[i], y));
+    y += 4;
+    doc.setDrawColor(220); doc.line(14, y, 170, y);
+    y += 6;
+    doc.setFont(undefined, 'normal');
+    chrono.forEach((r, idx) => {
+      if (y > 285) { doc.addPage(); y = 20; }
+      const vals = [String(idx + 1), fmtTs(r.ts), String(r.bpm), String(r.spo2), String(r.pm1), String(r.pm25), String(r.pm10)];
+      vals.forEach((v, i) => doc.text(v, colX[i], y));
+      y += 6;
+    });
+
+    doc.save('vitalmonitor-history-' + Date.now() + '.pdf');
+  }
+
+  $('downloadPdfBtn').addEventListener('click', () => {
+    generateHistoryPdf(syncRecords.filter(Boolean));
+  });
+
+  // ---------- Profile ----------
+  async function loadProfile() {
+    try {
+      const data = await readJSON(chars.profile);
+      $('profName').value = data.name || '';
+      $('profAge').value = data.age || '';
+      $('profGender').value = data.gender || 'Male';
+    } catch (e) {
+      showToast('Could not load profile: ' + e.message);
+    }
+  }
+  $('saveProfileBtn').addEventListener('click', async () => {
+    const payload = JSON.stringify({
+      name: $('profName').value.trim(),
+      age: parseInt($('profAge').value, 10) || 0,
+      gender: $('profGender').value
+    });
+    try {
+      await writeStr(chars.profile, payload);
+      showToast('Profile saved.');
+    } catch (e) {
+      showToast('Could not save profile: ' + e.message);
+    }
+  });
+
+})();
+</script>
+</body>
+</html>
